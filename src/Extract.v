@@ -13,6 +13,8 @@ Require Import Buchberger.LexiOrder.
 Require Import Buchberger.BuchRed.
 Require Extraction.
 
+Set Extraction Output Directory "./src".
+
 Extraction
  "sin_num.ml" redbuch splus smult sscal spO sp1 sgen orderc_dec degc
              total_orderc_dec.

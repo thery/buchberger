@@ -12,21 +12,17 @@ Load hOrderStructure.
 Load hBuch.
  
 Theorem Cb_addEnd_cons :
- forall (L : list (poly A0 eqA ltM)) (p q : poly A0 eqA ltM),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (addEnd A A0 eqA n ltM p L) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (p :: L).
+ forall (L : list poly) (p q : poly), Cb q (addEnd p L) -> Cb q (p :: L).
 Proof using os minusA invA divA cs A1.
-intros L p q H; apply Cb_incl with (1 := cs) (P := addEnd A A0 eqA n ltM p L);
- auto.
+intros L p q H; apply Cb_incl with (1 := cs) (P := addEnd p L); auto.
 elim L; simpl in |- *; auto.
 intros a l H0 a0 H1; elim H1; clear H1; intros H1; auto.
 case (H0 a0); auto.
 Qed.
 
 Theorem Cb_cons_addEnd :
- forall (L : list (poly A0 eqA ltM)) (p q : poly A0 eqA ltM),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (p :: L) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (addEnd A A0 eqA n ltM p L).
+ forall (L : list poly) (p q : poly),
+ Cb q (p :: L) -> Cb q (addEnd p L).
 Proof using os minusA invA divA cs A1.
 intros L p q H; apply Cb_incl with (1 := cs) (P := p :: L); auto.
 elim L; simpl in |- *; auto.
@@ -35,46 +31,38 @@ case H1; auto.
 Qed.
  
 Theorem Cb_trans_cons :
- forall (L : list (poly A0 eqA ltM)) (p q : poly A0 eqA ltM),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (p :: L) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q L.
+ forall (L : list poly) (p q : poly), Cb q (p :: L) -> Cb p L -> Cb q L.
 Proof using os minusA invA divA cs A1.
 intros L p q H H0.
 apply Cb_trans with (1 := cs) (b := p); auto.
 apply Cb_cons_addEnd; auto.
 Qed.
 
+Notation CombLinear := (CombLinear A A0 eqA plusA multA eqA_dec n ltM ltM_dec).
+Notation Reducef := (Reducef A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
+    os).
+Notation unit := (unit _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM).
+
 Theorem Cb_cons :
- forall (p : poly A0 eqA ltM) (L : list (poly A0 eqA ltM)),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec
-   (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os p
-      L) (p :: L).
+ forall (p : poly) (L : list poly), Cb (nf p L) (p :: L).
 Proof.
 intros p L; unfold nf, LetP in |- *; auto.
-case
- (Reducef A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-    os L p); simpl in |- *; auto.
+case (Reducef L p); simpl in |- *; auto.
 intros x0; case x0; simpl in |- *.
 intros x c H'.
-change
-  (CombLinear A A0 eqA plusA multA eqA_dec n ltM ltM_dec 
-     (p :: L)
-     (mults (A:=A) multA (n:=n)
-        (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM x c)) x)) 
+change (CombLinear (p :: L) (mults (A:=A) multA (n:=n)
+        (unit (mks x c)) x)) 
  in |- *.
 apply CombLinear_mults1 with (1 := cs); auto.
-apply unit_nZ with (1 := cs); auto.
+apply unit_nZ; auto.
 apply reducestar_cb1 with (1 := cs); auto.
 Qed.
 
 Theorem Cb_comp :
- forall L1 L2 : list (poly A0 eqA ltM),
- (forall p : poly A0 eqA ltM,
-  In p L1 -> Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L2) ->
- forall q : poly A0 eqA ltM,
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q L1 ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q L2.
+ forall L1 L2 : list poly,
+ (forall p : poly,
+  In p L1 -> Cb p L2) ->
+ forall q : poly, Cb q L1 -> Cb q L2.
 Proof using os minusA invA divA cs A1.
 intros L1 L2 H' q; case q; simpl in |- *.
 intros x H'0 H'1.
@@ -86,38 +74,26 @@ lapply (H' q1); [ intros H'6 | idtac ]; auto.
 generalize H'6 H1; case q1; simpl in |- *; auto.
 intros x0 H'5 H'7 H'8; rewrite H'8; auto.
 Qed.
- 
-Theorem Cb_nf :
- forall (p : poly A0 eqA ltM) (L : list (poly A0 eqA ltM)),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p
-   (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os p
-      L :: L).
+
+Theorem Cb_nf : forall (p : poly) (L : list poly), Cb p (nf p L :: L).
 Proof.
 intros p L; unfold nf in |- *.
-case
- (Reducef A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-    os L p); auto.
+case (Reducef L p); auto.
 case p.
 unfold LetP in |- *; intros x H' x0; case x0; simpl in |- *.
 intros x1 c H'0.
 change
-  (CombLinear A A0 eqA plusA multA eqA_dec n ltM ltM_dec
-     (mks A A0 eqA n ltM
+  (CombLinear
+     (mks
         (mults (A:=A) multA (n:=n)
-           (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM x1 c)) x1)
-        (canonical_mults A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec
-           n ltM os (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM x1 c))
+           (unit (mks x1 c)) x1)
+        (canonical_mults (unit (mks x1 c))
            x1
-           (unit_nZ A A0 A1 eqA plusA invA minusA multA divA cs n ltM
-              (mks A A0 eqA n ltM x1 c)) c) :: L) x) 
+           (unit_nZ A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
+              (mks x1 c)) c) :: L) x) 
  in |- *.
-apply CombLinear_compo with (1 := cs) (L1 := mks A A0 eqA n ltM x1 c :: L);
- auto.
-change
-  (CombLinear A A0 eqA plusA multA eqA_dec n ltM ltM_dec
-     (mks A A0 eqA n ltM x1 c :: L)
-     (s2p A A0 eqA n ltM (mks A A0 eqA n ltM x H'))) 
- in |- *.
+apply CombLinear_compo with (1 := cs) (L1 := mks x1 c :: L); auto.
+change (CombLinear (mks x1 c :: L) (s2p (mks x H'))) in |- *.
 apply reducestar_cb2 with (1 := cs); auto.
 intros q H'1; inversion H'1; auto.
 2: apply CombLinear_id with (1 := cs); auto.
@@ -125,44 +101,34 @@ intros q H'1; inversion H'1; auto.
 generalize c H2; case x1; auto.
 intros c0 H'2; inversion H'2.
 intros a0 l c0 H'2.
-cut
- (~
-  zeroP (A:=A) A0 eqA (n:=n)
-    (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (a0 :: l) c0)));
+cut (~ zeroP (A:=A) A0 eqA (n:=n) (unit (mks (a0 :: l) c0)));
  [ intros nZu | idtac ]; auto.
 apply
  CombLinear_1
   with
     (a := divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) 
             (T1 A1 n)
-            (b:=unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (pX a0 l) c0))
+            (b:=unit (mks (pX a0 l) c0))
             nZu)
     (p := pO A n)
-    (q := mults (A:=A) multA (n:=n)
-            (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (pX a0 l) c0))
-            (pX a0 l)); auto.
+    (q := mults (A:=A) multA (n:=n) (unit (mks (pX a0 l) c0)) (pX a0 l)); auto.
 simpl in |- *; auto.
 change
   (inPolySet A A0 eqA n ltM
      (pX
         (multTerm (A:=A) multA (n:=n)
-           (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (pX a0 l) c0)) a0)
+           (unit (mks (pX a0 l) c0)) a0)
         (mults (A:=A) multA (n:=n)
-           (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (pX a0 l) c0)) l))
-     (exist (fun a1 => canonical A0 eqA ltM a1)
+           (unit (mks (pX a0 l) c0)) l))
+     (exist (fun a1 => canonical a1)
         (pX
-           (multTerm (A:=A) multA (n:=n)
-              (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (a0 :: l) c0))
-              a0)
-           (mults (A:=A) multA (n:=n)
-              (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (a0 :: l) c0))
-              l))
-        (canonical_mults A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec
-           n ltM os
-           (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (pX a0 l) c0))
+           (multTerm (A:=A) multA (n:=n) (unit (mks (a0 :: l) c0)) a0)
+           (mults (A:=A) multA (n:=n) (unit (mks (a0 :: l) c0)) l))
+        (canonical_mults
+           (unit (mks (pX a0 l) c0))
            (pX a0 l)
-           (unit_nZ _ _ _ _ _ _ _ _ _ cs _ ltM
-              (mks A A0 eqA n ltM (pX a0 l) c0)) c0) :: L)) 
+           (unit_nZ _ _ _ _ _ _ _ _ _ cs eqA_dec _ ltM
+              (mks (pX a0 l) c0)) c0) :: L)) 
  in |- *.
 apply incons; auto.
 apply CombLinear_0; auto.
@@ -172,10 +138,9 @@ apply
     (y := mults (A:=A) multA (n:=n)
             (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) 
                (T1 A1 n)
-               (b:=unit A A0 A1 eqA divA n ltM
-                     (mks A A0 eqA n ltM (a0 :: l) c0)) nZu)
+               (b:=unit (mks (a0 :: l) c0)) nZu)
             (mults (A:=A) multA (n:=n)
-               (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (a0 :: l) c0))
+               (unit (mks (a0 :: l) c0))
                (a0 :: l))); auto.
 2: apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
@@ -185,9 +150,8 @@ apply
             (multTerm (A:=A) multA (n:=n)
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) 
                   (T1 A1 n)
-                  (b:=unit A A0 A1 eqA divA n ltM
-                        (mks A A0 eqA n ltM (a0 :: l) c0)) nZu)
-               (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (a0 :: l) c0)))
+                  (b:=unit (mks (a0 :: l) c0)) nZu)
+               (unit (mks (a0 :: l) c0)))
             (a0 :: l)); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -195,18 +159,15 @@ apply
  auto.
 rewrite H'2; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply divTerm_on_eqT with (1 := cs); auto.
 apply (eqT_sym A n); auto.
 apply unit_T1; auto.
-apply unit_nZ with (1 := cs); auto.
+apply unit_nZ; auto.
 Qed.
 
 Theorem zerop_elim_Cb :
- forall (L : list (poly A0 eqA ltM)) (p q : poly A0 eqA ltM),
- zerop A A0 eqA n ltM p ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (p :: L) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q L.
+ forall (L : list poly) (p q : poly), zerop p -> Cb q (p :: L) -> Cb  q L.
 Proof using os minusA invA divA cs A1.
 intros L p q H' H'0.
 apply Cb_comp with (L1 := p :: L); auto.
@@ -217,57 +178,48 @@ intros p0 H'1; case H'1;
 generalize H'; case p; simpl in |- *; auto.
 intros x; case x; simpl in |- *; auto.
 intros H'1 H'3; try assumption.
-change (CombLinear A A0 eqA plusA multA eqA_dec n ltM ltM_dec L (pO A n))
- in |- *.
+change (CombLinear L (pO A n)) in |- *.
 apply CombLinear_0; auto.
 intros a l H'1 H'3; elim H'3; auto.
 apply Cb_id with (1 := cs); auto.
 Qed.
 
 Theorem Cb_compo :
- forall (p : poly A0 eqA ltM) (L1 : list (poly A0 eqA ltM)),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L1 ->
- forall L2 : list (poly A0 eqA ltM),
- (forall q : poly A0 eqA ltM,
-  In q L1 -> Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q L2) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L2.
+ forall (p : poly) (L1 : list poly),
+ Cb p L1 ->
+ forall L2 : list poly,
+ (forall q : poly, In q L1 -> Cb q L2) -> Cb p L2.
 Proof using os minusA invA divA cs A1.
 intros p L1 H' L2 H'0.
 apply Cb_comp with (L1 := L1); auto.
 Qed.
 
-Definition reducep (L : list (poly A0 eqA ltM)) (p q : poly A0 eqA ltM) :
-  Prop :=
-  reduce A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec L
-    (s2p A A0 eqA n ltM p) (s2p A A0 eqA n ltM q).
+Definition reducep (L : list poly) (p q : poly) : Prop :=
+  reduce L (s2p p) (s2p q).
  
 Theorem grobner_def :
- forall L : list (poly A0 eqA ltM),
- Grobner A A0 A1 eqA plusA invA minusA multA divA eqA_dec n ltM ltM_dec L ->
- forall p : poly A0 eqA ltM,
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L ->
- zerop A A0 eqA n ltM p \/ (exists q : poly A0 eqA ltM, reducep L p q).
+ forall L : list poly,
+ Grobner L ->
+ forall p : poly, Cb p L -> zerop p \/ (exists q : poly, reducep L p q).
 Proof using os cs.
 intros L H'; inversion H'; auto.
 intros p H'0.
-case
- (Reducef A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-    os L p).
+case (Reducef  L p).
 intros x H'1; inversion H'.
-lapply (H0 (s2p A A0 eqA n ltM p) (s2p A A0 eqA n ltM x));
+lapply (H0 (s2p p) (s2p x));
  [ intros H'4; lapply H'4; [ clear H'4 | clear H'4 ] | idtac ]; 
  auto.
 inversion H'1; auto.
 inversion H1; auto.
 intros H'2; left.
-cut (eqP A eqA n (s2p A A0 eqA n ltM p) (pO A n)); auto.
+cut (eqP A eqA n (s2p p) (pO A n)); auto.
 case p; simpl in |- *; auto.
 intros x1; case x1; auto.
 intros a l H'3 H'4; inversion H'4.
-apply (eqp_trans _ _ _ _ _ _ _ _ _ cs n) with (y := s2p A A0 eqA n ltM x);
+apply (eqp_trans _ _ _ _ _ _ _ _ _ cs n) with (y := s2p x);
  auto.
-intros H'2; right; cut (canonical A0 eqA ltM y); auto.
-intros H'3; exists (mks A A0 eqA n ltM y H'3); generalize H5; case p;
+intros H'2; right; cut (canonical y); auto.
+intros H'3; exists (mks y H'3); generalize H5; case p;
  simpl in |- *; auto.
 apply canonical_reduce with (1 := cs) (3 := H5); auto.
 generalize H'0; case p; simpl in |- *; auto.
@@ -275,20 +227,19 @@ generalize H'0; case p; simpl in |- *; auto.
 Qed.
 
 Theorem def_grobner :
- forall L : list (poly A0 eqA ltM),
- (forall p : poly A0 eqA ltM,
-  Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L ->
-  zerop A A0 eqA n ltM p \/ (exists q : poly A0 eqA ltM, reducep L p q)) ->
- Grobner A A0 A1 eqA plusA invA minusA multA divA eqA_dec n ltM ltM_dec L.
+ forall L : list poly,
+ (forall p : poly,
+  Cb p L ->
+  zerop p \/ (exists q : poly, reducep L p q)) -> Grobner L.
 Proof using os cs.
 intros L H'.
 apply Grobner0.
 intros p q H'0 H'1.
-cut (canonical A0 eqA ltM p).
+cut (canonical p).
 intros H'2.
-cut (canonical A0 eqA ltM q).
+cut (canonical q).
 intros H'3.
-elim (H' (mks A A0 eqA n ltM q H'3)); [ intros H'6 | intros H'6 | idtac ];
+elim (H' (mks q H'3)); [ intros H'6 | intros H'6 | idtac ];
  auto.
 generalize H'3 H'6; case q; simpl in |- *; auto.
 intros a l H'4 H'5; elim H'5; auto.
@@ -296,10 +247,7 @@ case H'6; intros q0 E; clear H'6.
 inversion H'1.
 generalize H0 E; case q0; auto.
 simpl in |- *; auto.
-intros x H'4 H'5 H'6;
- absurd
-  (reduce A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec L q x);
- auto.
+intros x H'4 H'5 H'6; absurd (reduce L q x); auto.
 simpl in |- *; auto.
 apply reducestar_cb with (a := p) (1 := cs); auto.
 inversion H'1.
@@ -308,12 +256,9 @@ apply CombLinear_canonical with (1 := cs) (3 := H'0); auto.
 Qed.
 
 Theorem reduce_divp :
- forall (p q : poly A0 eqA ltM) (Q : list (poly A0 eqA ltM)),
- reduce A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q
-   (s2p A A0 eqA n ltM p) (s2p A A0 eqA n ltM q) ->
- exists r : poly A0 eqA ltM,
-   In r (q :: Q) /\
-   divp A A0 eqA multA divA n ltM p r /\ ~ zerop A A0 eqA n ltM r.
+ forall (p q : poly) (Q : list poly),
+ reduce Q (s2p p) (s2p q) ->
+ exists r : poly, In r (q :: Q) /\ divp p r /\ ~ zerop r.
 Proof using plusA cs.
 intros p q; case p; case q; simpl in |- *.
 intros x H' x0 c Q H'0; inversion H'0.
@@ -329,7 +274,7 @@ rewrite <- H5; trivial.
 generalize H'1 H'2 c0; case q1; simpl in |- *; auto.
 intros x1; case x1; auto.
 intros c1 H'3 H'4; discriminate H'4.
-exists (exist (fun l : list (Term A n) => canonical A0 eqA ltM l) x H');
+exists (exist (fun l : list (Term A n) => canonical l) x H');
  split; [ left | split ]; simpl in |- *; auto.
 generalize c; rewrite <- H1; unfold pX in |- *; auto.
 generalize H'; rewrite <- H2; unfold pX in |- *; auto.
@@ -343,16 +288,11 @@ generalize c H'; rewrite <- H2; auto.
 Qed.
 
 Theorem reduceplus_divp_lem :
- forall (a b : list (Term A n)) (Q : list (poly A0 eqA ltM)),
- reduceplus A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q a b ->
- canonical A0 eqA ltM a ->
- forall x y : poly A0 eqA ltM,
- s2p A A0 eqA n ltM x = a ->
- s2p A A0 eqA n ltM y = b ->
- ~ zerop A A0 eqA n ltM x ->
- exists r : poly A0 eqA ltM,
-   In r (y :: Q) /\
-   divp A A0 eqA multA divA n ltM x r /\ ~ zerop A A0 eqA n ltM r.
+ forall (a b : list (Term A n)) (Q : list poly),
+ reduceplus Q a b -> canonical a ->
+ forall x y : poly,
+ s2p x = a -> s2p y = b -> ~ zerop x ->
+ exists r : poly, In r (y :: Q) /\ divp x r /\ ~ zerop r.
 Proof using plusA os cs.
 intros a b Q H'; elim H'; auto.
 intros x y H'0 H'1 x0 y0 H'2 H'3 H'4; exists y0; split; [ idtac | split ];
@@ -375,9 +315,9 @@ intros x1; case x1; simpl in |- *; auto.
 intros H'0 x2; case x2; simpl in |- *; auto.
 intros t l H'4 H'5; inversion_clear H'5.
 intros x y z H'0 H'1 H'2 H'3 x0 y0 H'4 H'5 H'6.
-cut (canonical A0 eqA ltM y); [ intros Z | idtac ].
+cut (canonical y); [ intros Z | idtac ].
 2: apply canonical_reduce with (1 := cs) (3 := H'0); auto.
-lapply (reduce_divp x0 (mks A A0 eqA n ltM y Z) Q); [ intros H'9 | idtac ];
+lapply (reduce_divp x0 (mks y Z) Q); [ intros H'9 | idtac ];
  auto.
 2: rewrite H'4; simpl in |- *; auto.
 case H'9; intros r E; case E; simpl in |- *; intros H'7 H'8; case H'8;
@@ -385,7 +325,7 @@ case H'9; intros r E; case E; simpl in |- *; intros H'7 H'8; case H'8;
 case H'7; [ intros H'8; clear H'7 | intros H'8; clear H'7 ].
 2: exists r; split; [ right | idtac ]; auto.
 lapply H'2;
- [ intros H'7; lapply (H'7 (mks A A0 eqA n ltM y Z) y0); simpl in |- *;
+ [ intros H'7; lapply (H'7 (mks y Z) y0); simpl in |- *;
     [ intros H'13; lapply H'13;
        [ intros H'14; lapply H'14;
           [ intros H'15; clear H'14 H'13 H'2 | clear H'14 H'13 H'2 ]
@@ -402,71 +342,48 @@ generalize Z; case y; auto.
 Qed.
 
 Theorem reduceplus_divp :
- forall (a b : poly A0 eqA ltM) (Q : list (poly A0 eqA ltM)),
- reduceplus A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q
-   (s2p A A0 eqA n ltM a) (s2p A A0 eqA n ltM b) ->
- ~ zerop A A0 eqA n ltM a ->
- exists r : poly A0 eqA ltM,
-   In r (b :: Q) /\
-   divp A A0 eqA multA divA n ltM a r /\ ~ zerop A A0 eqA n ltM r.
+ forall (a b : poly) (Q : list poly),
+ reduceplus Q (s2p a) (s2p b) -> ~ zerop a ->
+ exists r : poly,
+   In r (b :: Q) /\ divp a r /\ ~ zerop r.
 Proof using plusA os cs.
 intros a b Q H' H'0.
-apply
- reduceplus_divp_lem
-  with (a := s2p A A0 eqA n ltM a) (b := s2p A A0 eqA n ltM b); 
- auto.
+apply reduceplus_divp_lem with (a := s2p a) (b := s2p b); auto.
 apply canonical_s2p; auto.
 Qed.
 
 Theorem reducestar_divp :
- forall (a b : poly A0 eqA ltM) (Q : list (poly A0 eqA ltM)),
- reducestar A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q
-   (s2p A A0 eqA n ltM a) (s2p A A0 eqA n ltM b) ->
- ~ zerop A A0 eqA n ltM a ->
- exists r : poly A0 eqA ltM,
-   In r (b :: Q) /\
-   divp A A0 eqA multA divA n ltM a r /\ ~ zerop A A0 eqA n ltM r.
+ forall (a b : poly) (Q : list poly),
+ reducestar Q (s2p a) (s2p b) -> ~ zerop a ->
+ exists r : poly, In r (b :: Q) /\ divp a r /\ ~ zerop r.
 Proof using plusA os cs.
 intros a b Q H' H'0; apply reduceplus_divp; auto.
 inversion H'; auto.
 Qed.
 
 Theorem nf_divp :
- forall (p : poly A0 eqA ltM) (L : list (poly A0 eqA ltM)),
- ~ zerop A A0 eqA n ltM p ->
- ~
- zerop A A0 eqA n ltM
-   (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os p
-      L) ->
- exists q : poly A0 eqA ltM,
-   In q
-     (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-        p L :: L) /\
-   divp A A0 eqA multA divA n ltM p q /\ ~ zerop A A0 eqA n ltM q.
+ forall (p : poly) (L : list poly),
+ ~ zerop p -> ~ zerop (nf p L) ->
+ exists q : poly, In q (nf p L :: L) /\ divp p q /\ ~ zerop q.
 Proof.
 intros p L; case p; unfold nf in |- *; auto.
 unfold nf in |- *; auto.
-intros x c;
- case
-  (Reducef A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-     os L (exist (fun l => canonical A0 eqA ltM l) x c)).
+intros x c; case (Reducef  L (exist (fun l => canonical l) x c)).
 unfold LetP in |- *.
 intros x0; case x0; auto.
 intros x1 c0 H' H'0 H'1.
-lapply
- (reducestar_divp (mks A A0 eqA n ltM x c) (mks A A0 eqA n ltM x1 c0) L);
+lapply (reducestar_divp (mks x c) (mks x1 c0) L);
  [ intros H'5; lapply H'5; [ intros H'6; clear H'5 | clear H'5 ] | idtac ];
  auto.
 case H'6; intros r E; case E; intros H'2 H'3; case H'3; intros H'4 H'5;
  clear H'3 E H'6.
 case H'2; [ intros H'3; clear H'2 | intros H'3; clear H'2 ].
 exists
- (mks A A0 eqA n ltM
+ (mks
     (mults (A:=A) multA (n:=n)
-       (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM x1 c0)) x1)
-    (canonical_mults _ _ _ _ _ _ _ _ _ cs eqA_dec _ _ os
-       (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM x1 c0)) x1
-       (unit_nZ _ _ _ _ _ _ _ _ _ cs n ltM (mks A A0 eqA n ltM x1 c0)) c0));
+       (unit (mks x1 c0)) x1)
+    (canonical_mults (unit (mks x1 c0)) x1
+       (unit_nZ _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM (mks x1 c0)) c0));
  split; [ idtac | split ]; auto.
 simpl in |- *; auto.
 apply (divp_trans _ _ _ _ _ _ _ _ _ cs n ltM) with (y := r); auto.
@@ -480,8 +397,7 @@ cut (~ zeroP (A:=A) A0 eqA (n:=n) a);
 cut
  (~
   zeroP (A:=A) A0 eqA (n:=n)
-    (multTerm (A:=A) multA (n:=n)
-       (unit A A0 A1 eqA divA n ltM (mks A A0 eqA n ltM (pX a l) c1)) a));
+    (multTerm (A:=A) multA (n:=n) (unit (mks (pX a l) c1)) a));
  [ intros nZu | idtac ]; auto.
 simpl in |- *; apply divTerm_def with (nZb := nZu); auto.
 apply divTerm_on_eqT with (1 := cs) (a := a); auto.
@@ -491,21 +407,19 @@ apply (eqTerm_imp_eqT A eqA n); auto.
 apply multTerm_eqT; auto.
 apply (eqT_sym A n); auto.
 apply unit_T1; auto.
-apply nzeroP_multTerm with (1 := cs); auto.
-apply unit_nZ with (1 := cs); auto.
+apply nzeroP_multTerm; auto.
+apply unit_nZ; auto.
 exists r; split; [ idtac | split ]; auto.
 simpl in |- *; auto.
 Qed.
 
 Theorem divp_reduce1 :
- forall (p : poly A0 eqA ltM) (L1 L2 : list (poly A0 eqA ltM)),
- (forall r1 : poly A0 eqA ltM,
-  In r1 L1 ->
-  ~ zerop A A0 eqA n ltM r1 ->
-  exists r2 : poly A0 eqA ltM,
-    In r2 L2 /\ divp A A0 eqA multA divA n ltM r1 r2) ->
- forall q : poly A0 eqA ltM,
- reducep L1 p q -> exists r : poly A0 eqA ltM, reducep L2 p r.
+ forall (p : poly) (L1 L2 : list poly),
+ (forall r1 : poly,
+  In r1 L1 -> ~ zerop r1 ->
+  exists r2 : poly, In r2 L2 /\ divp r1 r2) ->
+ forall q : poly,
+ reducep L1 p q -> exists r : poly, reducep L2 p r.
 Proof using plusA os cs.
 intros p L1 L2 H' q; case p; case q; simpl in |- *; auto.
 intros x H'0 x0 c H'1; generalize c; unfold reducep in H'1; simpl in H'1;
@@ -527,17 +441,16 @@ intros c3 H'6 H'8; elim H'8.
 intros t l0 c3 H'6 H'8 H'9 c4 H'12.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a0); [ intros nZa0 | idtac ].
 cut
- (canonical A0 eqA ltM
+ (canonical
     (spminusf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec a a0
        nZa0 p0 l)); [ intros Z | idtac ].
 exists
- (mks A A0 eqA n ltM
+ (mks
     (spminusf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec a a0
        nZa0 p0 l) Z); simpl in |- *; auto.
 red in |- *; simpl in |- *; apply reducetop_sp with (1 := cs); auto.
 change
-  (inPolySet A A0 eqA n ltM
-     (s2p A A0 eqA n ltM (mks A A0 eqA n ltM (pX a0 l) c2)) L2) 
+  (inPolySet A A0 eqA n ltM (s2p (mks (pX a0 l) c2)) L2) 
  in |- *.
 apply in_inPolySet; auto.
 simpl in |- *.
@@ -554,12 +467,12 @@ generalize H5; case q1; simpl in |- *; auto.
 intros x1; case x1; simpl in |- *; auto.
 intros c1 H'6; discriminate.
 intros a b p0 q0 H'2 H'3 H'4 c0.
-cut (canonical A0 eqA ltM p0);
+cut (canonical p0);
  [ intro | apply canonical_imp_canonical with (a := a); auto ].
 case (H'3 H); intros r; case r.
 intros x1 H'6 H'7.
-cut (canonical A0 eqA ltM (pX b x1)); [ intros Z | idtac ].
-exists (mks A A0 eqA n ltM (pX b x1) Z); simpl in |- *; auto.
+cut (canonical (pX b x1)); [ intros Z | idtac ].
+exists (mks (pX b x1) Z); simpl in |- *; auto.
 red in |- *; simpl in |- *; red in H'7; simpl in H'7; auto.
 apply eqp_imp_canonical with (1 := cs) (p := pX a x1); auto.
 apply ltP_pX_canonical; auto.
@@ -570,25 +483,20 @@ apply (canonical_pX_ltP A A0 eqA); auto.
 Qed.
 
 Theorem nf_divp_zero :
- forall (p : poly A0 eqA ltM) (L : list (poly A0 eqA ltM)),
- ~ zerop A A0 eqA n ltM p ->
- zerop A A0 eqA n ltM
-   (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os p
-      L) ->
- exists q : poly A0 eqA ltM,
-   In q L /\ divp A A0 eqA multA divA n ltM p q /\ ~ zerop A A0 eqA n ltM q.
+ forall (p : poly) (L : list poly),
+ ~ zerop p -> zerop (nf p L) ->
+ exists q : poly, In q L /\ divp p q /\ ~ zerop q.
 Proof.
 intros p L; case p; unfold nf in |- *; auto.
 unfold nf in |- *; auto.
 intros x c;
  case
-  (Reducef A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-     os L (exist (fun l : list (Term A n) => canonical A0 eqA ltM l) x c)).
+  (Reducef L (exist (fun l : list (Term A n) => canonical l) x c)).
 unfold LetP in |- *.
 simpl in |- *; intros x0; case x0; simpl in |- *; auto.
 intros x1 c0 H' H'0 H'1.
 lapply
- (reducestar_divp (mks A A0 eqA n ltM x c) (mks A A0 eqA n ltM x1 c0) L);
+ (reducestar_divp (mks x c) (mks x1 c0) L);
  simpl in |- *;
  [ intros H'5; lapply H'5; [ intros H'6; clear H'5 | clear H'5 ] | idtac ];
  auto.
@@ -601,10 +509,8 @@ exists r; split; [ idtac | split ]; auto.
 Qed.
 
 Theorem zerop_elim_cb :
- forall (L : list (poly A0 eqA ltM)) (p q : poly A0 eqA ltM),
- zerop A A0 eqA n ltM p ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q (p :: L) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec q L.
+ forall (L : list poly) (p q : poly),
+ zerop p -> Cb q (p :: L) -> Cb q L.
 Proof using os minusA invA divA cs A1.
 intros L p q H' H'0.
 apply Cb_comp with (L1 := p :: L); auto.
@@ -615,59 +521,41 @@ intros p0 H'1; case H'1;
 generalize H'; case p; simpl in |- *; auto.
 intros x; case x; simpl in |- *; auto.
 intros H'1 H'3; try assumption.
-change (CombLinear A A0 eqA plusA multA eqA_dec n ltM ltM_dec L (pO A n))
- in |- *.
+change (CombLinear L (pO A n)) in |- *.
 apply CombLinear_0; auto.
 intros a l H'1 H'3; elim H'3; auto.
 apply Cb_id with (1 := cs); auto.
 Qed.
 
 Theorem zerop_nf_cb :
- forall (L : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- zerop A A0 eqA n ltM
-   (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os p
-      L) -> Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L.
+ forall (L : list poly) (p : poly), zerop (nf p L) -> Cb p L.
 Proof.
 intros L p H'.
-apply
- zerop_elim_cb
-  with
-    (p := nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-            ltM_dec os p L); auto.
+apply zerop_elim_cb with (p := nf p L); auto.
 apply Cb_nf.
 Qed.
 
 Local Hint Resolve zerop_nf_cb : core.
 
 Definition redacc :
-  list (poly A0 eqA ltM) -> list (poly A0 eqA ltM) -> list (poly A0 eqA ltM).
+  list poly -> list poly -> list poly.
 intros H'; elim H'.
-intros L; exact (nil (A:=poly A0 eqA ltM)).
+intros L; exact (nil (A:=poly)).
 intros a p Rec Acc.
-apply
- LetP
-  with
-    (A := poly A0 eqA ltM)
-    (h := nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-            ltM_dec os a (p ++ Acc)).
+apply LetP with (A := poly) (h := nf a (p ++ Acc)).
 intros u H'0; case (zerop_dec A A0 eqA n ltM u); intros Z.
 exact (Rec Acc).
 exact (u :: Rec (u :: Acc)).
 Defined.
 
 Theorem redacc_cb :
- forall (L1 L2 : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- In p (redacc L1 L2) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (L1 ++ L2).
+ forall (L1 L2 : list poly) (p : poly), In p (redacc L1 L2) -> Cb p (L1 ++ L2).
 Proof.
 intros L1; elim L1; auto.
 simpl in |- *; auto.
 intros L2 p H; elim H.
 simpl in |- *; unfold LetP in |- *; intros a l H' L2 p.
-case
- (zerop_dec A A0 eqA n ltM
-    (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-       a (l ++ L2))).
+case (zerop_dec A A0 eqA n ltM (nf a (l ++ L2))).
 intros H'0 H'1.
 apply Cb_incl with (P := l ++ L2) (1 := cs); auto.
 simpl in |- *; auto.
@@ -676,35 +564,18 @@ intros H'0 H'1; case H'1;
  [ intros H'2; rewrite <- H'2; clear H'1 | intros H'2; clear H'1 ]; 
  auto.
 apply Cb_cons; auto.
-apply
- Cb_trans_cons
-  with
-    (p := nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-            ltM_dec os a (l ++ L2)); auto.
-apply
- Cb_incl
-  with
-    (1 := cs)
-    (P := l ++
-          nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-            ltM_dec os a (l ++ L2) :: L2); auto.
+apply Cb_trans_cons with (p := nf a (l ++ L2)); auto.
+apply Cb_incl with (1 := cs) (P := l ++ nf a (l ++ L2) :: L2); auto.
 change
-  (incl
-     (l ++
-      nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-        a (l ++ L2) :: L2)
-     (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-        a (l ++ L2) :: a :: l ++ L2)) in |- *.
+  (incl (l ++ nf a (l ++ L2) :: L2) (nf a (l ++ L2) :: a :: l ++ L2)) in |- *.
 apply incl_app; auto with datatypes.
 apply Cb_cons; auto.
 Qed.
 
-Definition Red (L : list (poly A0 eqA ltM)) : list (poly A0 eqA ltM) :=
+Definition Red (L : list poly) : list poly :=
   redacc L nil.
  
-Theorem Red_cb :
- forall (L : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- In p (Red L) -> Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L.
+Theorem Red_cb : forall (L : list poly) (p : poly), In p (Red L) -> Cb p L.
 Proof.
 unfold Red in |- *.
 intros L p H'.
@@ -713,9 +584,7 @@ rewrite app_nil_r; auto.
 Qed.
  
 Theorem cb_redacc :
- forall (L1 L2 : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- In p L1 ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (redacc L1 L2 ++ L2).
+ forall (L1 L2 : list poly) (p : poly), In p L1 -> Cb p (redacc L1 L2 ++ L2).
 Proof.
 intros L1; elim L1; simpl in |- *; auto.
 intros L2 p H'; elim H'; auto.
@@ -723,10 +592,7 @@ unfold LetP in |- *.
 intros a l H' L2 p H'0; case H'0;
  [ intros H'1; rewrite H'1; clear H'0 | intros H'1; clear H'0 ]; 
  auto.
-case
- (zerop_dec A A0 eqA n ltM
-    (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-       p (l ++ L2))); auto.
+case (zerop_dec A A0 eqA n ltM (nf p (l ++ L2))); auto.
 intros H'0.
 apply Cb_comp with (L1 := l ++ L2); auto.
 intros p0 H'2.
@@ -734,28 +600,16 @@ lapply (in_app_or l L2 p0); auto.
 intros H'3; case H'3; auto.
 intros H'4; apply Cb_id with (1 := cs); auto with datatypes.
 intros H'0.
-2: case
-    (zerop_dec A A0 eqA n ltM
-       (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-          os a (l ++ L2))); auto.
+2: case (zerop_dec A A0 eqA n ltM (nf a (l ++ L2))); auto.
 2: intros H'0.
 2: apply
     Cb_incl
      with
        (1 := cs)
-       (P := redacc l
-               (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-                  ltM_dec os a (l ++ L2) :: L2) ++
-             nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-               ltM_dec os a (l ++ L2) :: L2); auto with datatypes.
+       (P := redacc l (nf a (l ++ L2) :: L2) ++ nf a (l ++ L2) :: L2); auto with datatypes.
 2: intros a0 H; case (in_app_or _ _ _ H); auto with datatypes.
 2: simpl in |- *; intros H1; case H1; auto with datatypes.
-apply
- Cb_compo
-  with
-    (L1 := nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-             ltM_dec os p (l ++ L2) :: l ++ L2); simpl in |- *; 
- auto.
+apply Cb_compo with (L1 := nf p (l ++ L2) :: l ++ L2); simpl in |- *; auto.
 apply Cb_nf; auto.
 intros q H'2; case H'2;
  [ intros H'3; rewrite <- H'3; clear H'2 | intros H'3; clear H'2 ];
@@ -767,19 +621,13 @@ apply
  Cb_incl
   with
     (1 := cs)
-    (P := redacc l
-            (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-               ltM_dec os p (l ++ L2) :: L2) ++
-          nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM
-            ltM_dec os p (l ++ L2) :: L2); auto with datatypes.
+    (P := redacc l (nf p (l ++ L2) :: L2) ++ nf p (l ++ L2) :: L2); auto with datatypes.
 intros a0 H; case (in_app_or _ _ _ H); auto with datatypes.
 simpl in |- *; intros H1; case H1; auto with datatypes.
 intros H; apply Cb_id with (1 := cs); auto with datatypes.
 Qed.
 
-Theorem Cb_Red :
- forall (L : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- In p L -> Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (Red L).
+Theorem Cb_Red : forall (L : list poly) (p : poly), In p L -> Cb p (Red L).
 Proof.
 intros L p H'.
 lapply (cb_redacc L nil p); [ intros H'3; generalize H'3 | idtac ];
@@ -788,9 +636,7 @@ rewrite app_nil_r; auto.
 Qed.
 
 Theorem cb_Red_cb1 :
- forall (p : poly A0 eqA ltM) (L : list (poly A0 eqA ltM)),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (Red L).
+ forall (p : poly) (L : list poly), Cb p L -> Cb p (Red L).
 Proof.
 intros p L H'.
 apply Cb_compo with (L1 := L); auto.
@@ -798,10 +644,7 @@ intros q H'0.
 apply Cb_Red; auto.
 Qed.
 
-Theorem cb_Red_cb2 :
- forall (p : poly A0 eqA ltM) (L : list (poly A0 eqA ltM)),
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (Red L) ->
- Cb A A0 eqA plusA multA eqA_dec n ltM ltM_dec p L.
+Theorem cb_Red_cb2 : forall (p : poly) (L : list poly), Cb p (Red L) -> Cb p L.
 Proof.
 intros p L H'.
 apply Cb_compo with (L1 := Red L); auto.
@@ -809,10 +652,8 @@ intros q H'0.
 apply Red_cb; auto.
 Qed.
 
-Theorem divp_id :
- forall p : poly A0 eqA ltM,
- ~ zerop A A0 eqA n ltM p -> divp A A0 eqA multA divA n ltM p p.
-Proof using plusA minusA invA cs A1.
+Theorem divp_id : forall p : poly, ~ zerop p -> divp p p.
+Proof using os cs eqA_dec.
 intros p; case p; auto.
 intros x; case x; simpl in |- *; auto.
 intros a l H' J.
@@ -828,12 +669,9 @@ apply canonical_nzeroP with (p := l) (ltM := ltM); auto.
 Qed.
 
 Theorem redacc_divp :
- forall (L1 L2 : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- ~ zerop A A0 eqA n ltM p ->
- In p (L1 ++ L2) ->
- exists q : poly A0 eqA ltM,
-   In q (redacc L1 L2 ++ L2) /\
-   divp A A0 eqA multA divA n ltM p q /\ ~ zerop A A0 eqA n ltM q.
+ forall (L1 L2 : list poly) (p : poly),
+ ~ zerop p -> In p (L1 ++ L2) ->
+ exists q : poly, In q (redacc L1 L2 ++ L2) /\ divp p q /\ ~ zerop q.
 Proof.
 intros L1; elim L1; simpl in |- *; auto.
 intros L2 p H' H'0; exists p; split; auto.
@@ -843,10 +681,7 @@ unfold LetP in |- *.
 intros a l H' L2 p H'0 H'1; case H'1;
  [ intros H'2; rewrite <- H'2; clear H'1 | intros H'2; clear H'1 ]; 
  auto.
-case
- (zerop_dec A A0 eqA n ltM
-    (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-       a (l ++ L2))); simpl in |- *; auto.
+case (zerop_dec A A0 eqA n ltM (nf a (l ++ L2))); simpl in |- *; auto.
 intros Z1.
 lapply (nf_divp_zero a (l ++ L2));
  [ intros H'5; lapply H'5; [ intros H'6; clear H'5 | clear H'5 ] | idtac ];
@@ -870,10 +705,7 @@ case H'6; intros q E; case E; intros H'3 H'4; case H'4; intros H'5 H'7;
 simpl in H'3.
 case H'3; [ intros H'4; clear H'3 | intros H'4; clear H'3 ].
 exists q; split; [ idtac | split ]; auto.
-lapply
- (H'
-    (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-       a (l ++ L2) :: L2) q);
+lapply (H' (nf a (l ++ L2) :: L2) q);
  [ intros H'8; lapply H'8; [ intros H'9; clear H'8 | clear H'8 ] | idtac ];
  auto.
 case H'9; intros q0 E; case E; intros H'3 H'6; case H'6; intros H'8 H'10;
@@ -888,17 +720,11 @@ auto with datatypes.
 apply (divp_trans _ _ _ _ _ _ _ _ _ cs n ltM) with (y := q); auto.
 case (in_app_or _ _ _ H'4); auto with datatypes.
 rewrite H'2; auto.
-case
- (zerop_dec A A0 eqA n ltM
-    (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-       a (l ++ L2))); simpl in |- *; auto.
+case (zerop_dec A A0 eqA n ltM (nf a (l ++ L2))); simpl in |- *; auto.
 intros Z1.
 case (in_app_or _ _ _ H'2); auto.
 intros H'3.
-lapply
- (H'
-    (nf A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec os
-       a (l ++ L2) :: L2) p);
+lapply (H' (nf a (l ++ L2) :: L2) p);
  [ intros H'6; lapply H'6; [ intros H'7; clear H'6 | clear H'6 ] | idtac ];
  auto with datatypes.
 case H'7; intros q E; case E; intros H'4 H'5; case H'5; intros H'6 H'8;
@@ -913,12 +739,9 @@ apply divp_id; auto.
 Qed.
 
 Theorem Red_divp :
- forall (L : list (poly A0 eqA ltM)) (p : poly A0 eqA ltM),
- In p L ->
- ~ zerop A A0 eqA n ltM p ->
- exists q : poly A0 eqA ltM,
-   In q (Red L) /\
-   divp A A0 eqA multA divA n ltM p q /\ ~ zerop A A0 eqA n ltM q.
+ forall (L : list poly) (p : poly),
+ In p L -> ~ zerop p ->
+ exists q : poly, In q (Red L) /\ divp p q /\ ~ zerop q.
 Proof.
 intros L p H' H'0.
 lapply (redacc_divp L nil p); auto.
@@ -927,11 +750,7 @@ rewrite app_nil_r; auto.
 rewrite app_nil_r; auto.
 Qed.
  
-Theorem Red_grobner :
- forall L : list (poly A0 eqA ltM),
- Grobner A A0 A1 eqA plusA invA minusA multA divA eqA_dec n ltM ltM_dec L ->
- Grobner A A0 A1 eqA plusA invA minusA multA divA eqA_dec n ltM ltM_dec
-   (Red L).
+Theorem Red_grobner : forall L : list poly, Grobner L -> Grobner (Red L).
 Proof.
 intros L H'.
 apply def_grobner; auto.
@@ -953,20 +772,12 @@ exists q0; split; auto.
 apply cb_Red_cb2; auto.
 Qed.
 
-Definition redbuch (L : list (poly A0 eqA ltM)) : list (poly A0 eqA ltM) :=
-  Red
-    (buch A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-       os L).
- 
-Theorem redbuch_stable :
- forall P : list (poly A0 eqA ltM),
- stable A A0 eqA plusA multA eqA_dec n ltM ltM_dec P (redbuch P).
+Definition redbuch (L : list poly) : list poly := Red (buch L).
+
+Theorem redbuch_stable : forall P : list poly, stable P (redbuch P).
 Proof.
 intros P.
-cut
- (stable A A0 eqA plusA multA eqA_dec n ltM ltM_dec P
-    (buch A A0 A1 eqA plusA invA minusA multA divA cs eqA_dec n ltM ltM_dec
-       os P)).
+cut (stable P (buch P)).
 intros H'0; inversion H'0; auto.
 apply stable0; unfold redbuch in |- *; auto.
 intros a H'.
@@ -977,10 +788,7 @@ apply cb_Red_cb2; auto.
 apply buch_Stable; auto.
 Qed.
 
-Theorem redbuch_Grobner :
- forall P : list (poly A0 eqA ltM),
- Grobner A A0 A1 eqA plusA invA minusA multA divA eqA_dec n ltM ltM_dec
-   (redbuch P).
+Theorem redbuch_Grobner : forall P : list poly, Grobner (redbuch P).
 Proof.
 intros P.
 unfold redbuch in |- *.

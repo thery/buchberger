@@ -9,7 +9,7 @@
                                                                            
   ************************************************************************** *)
 
-From Coq Require Import Relation_Definitions List.
+From Stdlib Require Import Relation_Definitions List.
 From Buchberger Require Import CoefStructure moreCoefStructure OrderStructure.
 From Buchberger Require Import Monomials Term.
 
@@ -58,7 +58,7 @@ apply
   with
     (y := divA (multA (plusA (divA a2 a0 nZc) (divA a1 a0 nZc)) a0) a0 nZc);
  auto.
-apply divA_eqA_comp with (1 := cs); auto.
+apply divA_eqA_comp; auto.
 apply
  (eqA_trans _ _ _ _ _ _ _ _ _ cs)
   with (y := plusA (multA a0 (divA a2 a0 nZc)) (multA a0 (divA a1 a0 nZc)));
@@ -88,7 +88,7 @@ apply
   with (y := multA (plusA (divA a2 a0 nZc) (divA a1 a0 nZc)) A1); 
  auto.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); auto.
-apply multA_eqA_comp with (1 := cs); auto.
+apply multA_eqA_comp; auto.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); auto.
 apply divA_A1 with (1 := cs); auto.
 apply multA_A1_r with (1 := cs); auto.
@@ -111,7 +111,7 @@ apply
  (eqA_trans _ _ _ _ _ _ _ _ _ cs)
   with (y := divA (multA (invA (divA d A0' nZA2)) A0') A0' nZA2); 
  auto.
-apply divA_eqA_comp with (1 := cs); auto.
+apply divA_eqA_comp; auto.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); apply multA_invA_com_l with (1 := cs);
  auto.
 apply
@@ -122,7 +122,7 @@ apply divA_multA_comp_l with (1 := cs).
 apply
  (eqA_trans _ _ _ _ _ _ _ _ _ cs)
   with (y := multA (invA (divA d A0' nZA2)) A1); auto.
-apply multA_eqA_comp with (1 := cs); auto.
+apply multA_eqA_comp; auto.
 apply divA_A1 with (1 := cs).
 apply multA_A1_r with (1 := cs).
 Qed.
@@ -353,7 +353,7 @@ Theorem divTerm_ppc :
  eqTerm (A:=A) eqA (n:=n) c (multTerm (A:=A) multA (n:=n) (divTerm c nZb) b) ->
  eqTerm (A:=A) eqA (n:=n) c
    (multTerm (A:=A) multA (n:=n) (divTerm c nZppab) (ppc a b)).
-Proof using plusA minusA invA cs.
+Proof using plusA minusA invA cs eqA_dec.
 intros a b c; case a; case b; case c; simpl in |- *; auto.
 intros a0 m a1 m0 a2 m1 nZa nZb nZppab H H0; split; auto.
 apply divA_is_multA with (1 := cs); auto.
@@ -436,6 +436,10 @@ apply
 Qed.
 
 Local Hint Resolve divP_inv1 divP_inv2 divP_inv3 : core.
+Let eqT_reflA := (eqT_refl A n).
+Local Hint Resolve eqT_reflA : core.
+Local Hint Resolve eqT_divTerm : core.
+
 
 Theorem divP_plusTerm :
  forall a b c : Term A n,
@@ -454,11 +458,6 @@ apply
             (multTerm (A:=A) multA (n:=n) (divTerm a nZb0) c)
             (multTerm (A:=A) multA (n:=n) (divTerm b nZb0) c)); 
  auto.
-apply eqTerm_plusTerm_comp with (1 := cs); auto.
-apply multTerm_eqT; auto.
-apply eqT_divTerm; auto.
-apply (eqT_refl A n).
-apply (eqT_refl A n).
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -466,20 +465,23 @@ apply
             (plusTerm (A:=A) plusA (n:=n) (divTerm a nZb0) (divTerm b nZb0))
             c); auto.
 apply multTerm_plusTerm_dist_l with (1 := cs); auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply eqT_divTerm_plusTerm; auto.
 Qed.
 
 Local Hint Resolve divP_plusTerm : core.
 
+Let nZero_invTerm_nZero := (nZero_invTerm_nZero _ _ _ _ _ _ _ _ _ cs).
+Hint Resolve nZero_invTerm_nZero : core.
+
 Theorem divP_invTerm_l :
  forall a b : Term A n, divP a b -> divP (invTerm (A:=A) invA (n:=n) a) b.
 Proof using plusA minusA cs A1.
-intros a b H'; inversion H'; auto.
+intros a b H'; inversion H'; auto. 
 apply divTerm_def with (nZb := nZb); auto.
 apply
- (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
+ (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n) 
   with
     (y := multTerm (A:=A) multA (n:=n)
             (invTerm (A:=A) invA (n:=n) (divTerm a nZb)) b); 
@@ -492,7 +494,7 @@ apply
  auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
  apply mult_invTerm_com with (1 := cs); auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply divTerm_invTerm_l; auto.
 Qed.
 
@@ -528,12 +530,12 @@ apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with (y := multTerm (A:=A) multA (n:=n) (divTerm a nZb) b); 
  auto.
-apply eqTerm_invTerm_comp with (1 := cs); auto.
+apply eqTerm_invTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
  apply mult_invTerm_com_r with (1 := cs); auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
  apply mult_invTerm_com with (1 := cs); auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply divTerm_invTerm_r; auto.
 Qed.
 
@@ -562,10 +564,10 @@ apply
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with (y := multTerm (A:=A) multA (n:=n) b a); auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply div_is_T1; auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply divTerm_multTerm_r; auto.
 Qed.
  
@@ -582,7 +584,7 @@ apply
     (y := multTerm (A:=A) multA (n:=n)
             (multTerm (A:=A) multA (n:=n) a (divTerm b nZb)) b); 
  auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply divTerm_multTerm_l; auto.
 Qed.
 
@@ -612,7 +614,7 @@ apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with (y := multTerm (A:=A) multA (n:=n) (divTerm a nZb) b); 
  auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 inversion H'0; inversion H'.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -687,7 +689,7 @@ Theorem ppc_is_ppcm :
  forall a b : Term A n,
  ~ zeroP (A:=A) A0 eqA (n:=n) a ->
  ~ zeroP (A:=A) A0 eqA (n:=n) b -> ppcm a b (ppc a b).
-Proof using plusA minusA invA cs.
+Proof using plusA minusA invA cs eqA_dec.
 intros a b nZa nZb; apply ppcm0; auto.
 intros r H'1 H'2; inversion H'1; inversion H'2.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) (ppc a b)); [ intros nZppab | auto ].
@@ -763,7 +765,7 @@ Theorem divP_ppcl :
  forall a b : Term A n,
  ~ zeroP (A:=A) A0 eqA (n:=n) a ->
  ~ zeroP (A:=A) A0 eqA (n:=n) b -> divP (ppc a b) a.
-Proof using plusA minusA invA cs.
+Proof using plusA minusA invA cs eqA_dec.
 intros a b H' H'0; try assumption.
 lapply (ppc_is_ppcm a b);
  [ intros H'3; lapply H'3; clear H'3; [ intros H'4 | idtac ] | idtac ]; 
@@ -775,7 +777,7 @@ Theorem divP_ppcr :
  forall a b : Term A n,
  ~ zeroP (A:=A) A0 eqA (n:=n) a ->
  ~ zeroP (A:=A) A0 eqA (n:=n) b -> divP (ppc a b) b.
-Proof using plusA minusA invA cs.
+Proof using plusA minusA invA cs eqA_dec.
 intros a b H' H'0; try assumption.
 lapply (ppc_is_ppcm a b);
  [ intros H'3; lapply H'3; clear H'3; [ intros H'4 | idtac ] | idtac ]; 
@@ -968,9 +970,6 @@ apply
  (eqT_trans A n) with (y := multTerm (A:=A) multA (n:=n) (divTerm c nZb) b);
  auto.
 apply (eqT_sym A n); auto.
-apply multTerm_eqT; auto.
-apply eqT_divTerm; auto; apply (eqT_refl A n); auto.
-apply (eqT_refl A n); auto.
 Qed.
 
 Local Hint Resolve eqT_nzero_eqT_divP : core.

@@ -62,9 +62,9 @@ Definition spolyp : poly A0 eqA ltM -> poly A0 eqA ltM -> poly A0 eqA ltM.
 intros p q; case p; case q.
 intros x Cpx x0 Cpx0;
  exists
-  (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec x x0 Cpx
+  (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec x x0 Cpx
      Cpx0); auto.
-apply spolyf_canonical with (1 := cs); auto.
+apply spolyf_canonical; auto.
 Defined.
 
 Theorem red_com :
@@ -76,13 +76,13 @@ unfold red in |- *; simpl in |- *.
 intros x Cx x0 Cx0 aL H'1; inversion H'1.
 cut
  (canonical A0 eqA ltM
-    (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec x x0 Cx
-       Cx0)); [ intros Op1 | apply spolyf_canonical with (1 := cs) ]; 
+    (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec x x0 Cx
+       Cx0)); [ intros Op1 | apply spolyf_canonical]; 
  auto.
 cut
  (canonical A0 eqA ltM
-    (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec x0 x Cx0
-       Cx)); [ intros Op2 | apply spolyf_canonical with (1 := cs) ]; 
+    (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec x0 x Cx0
+       Cx)); [ intros Op2 | apply spolyf_canonical]; 
  auto.
 apply reducestar0; auto.
 apply
@@ -90,16 +90,16 @@ apply
   with
     (1 := cs)
     (p := mults (A:=A) multA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))
-            (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec
+            (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec
                x x0 Cx Cx0))
     (q := mults (A:=A) multA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))
             (pO A n)); auto.
 apply reduceplus_mults with (1 := cs); auto.
 inversion H; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply spolyf_com with (1 := cs); auto.
+apply spolyf_com; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply spolyf_com with (1 := cs); auto.
+apply spolyf_com; auto.
 Qed.
 
 Theorem rstar_rtopO :
@@ -173,9 +173,9 @@ intros a P; case a.
 unfold red in |- *; simpl in |- *; auto.
 intros x H'.
 apply rstar_rtopO; auto.
-apply spolyf_canonical with (1 := cs); auto.
+apply spolyf_canonical; auto.
 apply Rstar_0; auto.
-apply spolyf_pO with (1 := cs); auto.
+apply spolyf_pO; auto.
 Qed.
 
 Theorem inP_reduce :
@@ -290,7 +290,7 @@ intros H'2; exists (pO A n); auto.
 intros a0 l0 H'2; exists (ppc (A:=A) A1 (n:=n) a a0 :: pO A n).
 change (canonical A0 eqA ltM (pX (ppc (A:=A) A1 (n:=n) a a0) (pO A n)))
  in |- *; apply canonicalp1; auto.
-apply ppc_nZ with (1 := cs); auto.
+apply ppc_nZ; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l); auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l0); auto.
 Defined.
@@ -442,8 +442,8 @@ apply
                ltM_dec (mults (A:=A) multA (n:=n) a0 q) p); 
     auto.
 2: apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-2: apply canonical_pluspf with (1 := os); auto.
-2: apply canonical_mults with (1 := cs); auto.
+2: apply canonical_pluspf; auto.
+2: apply canonical_mults; auto.
 2: apply inPolySet_imp_canonical with (L := R); auto.
 2: apply
     CombLinear_canonical
@@ -530,11 +530,11 @@ apply
 apply CombLinear_minuspf with (1 := cs); auto.
 apply CombLinear_mults1 with (1 := cs); auto.
 apply CombLinear_mults1 with (1 := cs); auto.
-apply spolyf_canonical with (1 := cs); auto.
+apply spolyf_canonical; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 change
   (eqP A eqA n
-     (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec
+     (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec
         (pX a0 l) (pX a1 l0) H' H'0)
      (minuspf A A0 A1 eqA invA minusA multA eqA_dec n ltM ltM_dec
         (mults (A:=A) multA (n:=n)
@@ -545,7 +545,7 @@ change
            (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
               (ppc (A:=A) A1 (n:=n) a0 a1) (b:=a1) Z1) 
            (pX a1 l0)))) in |- *.
-apply spoly_is_minus with (1 := cs); auto.
+apply spoly_is_minus; auto.
 Qed.
 
 Definition unit : poly A0 eqA ltM -> Term A n.
@@ -603,7 +603,7 @@ intros u H'1; case u.
 intros x0 H'2;
  exists (mults (A:=A) multA (n:=n) (unit (mks A A0 eqA n ltM x0 H'2)) x0);
  auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_mults; auto.
 apply unit_nZ; auto.
 Defined.
  
@@ -780,10 +780,10 @@ apply
  reducestar_eqp_com
   with
     (1 := cs)
-    (p := spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec
+    (p := spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec
             (pX a0 l) (pX a1 l0) c c0)
     (q := pO A n); auto.
-apply spoly_Reducestar_ppc with (1 := cs); auto.
+apply spoly_Reducestar_ppc; auto.
 change
   (inPolySet A A0 eqA n ltM
      (s2p A A0 eqA n ltM (mks A A0 eqA n ltM (pX a1 l0) c0)) P) 
@@ -796,7 +796,7 @@ change
  in |- *.
 apply in_inPolySet; auto.
 red in |- *; intros H'3; inversion H'3; auto.
-apply spolyf_canonical with (1 := cs); auto.
+apply spolyf_canonical; auto.
 Qed.
 
 End BuchAux.

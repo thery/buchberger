@@ -37,7 +37,7 @@ apply
 apply (eqT_sym A n); apply (eqTerm_imp_eqT A eqA); auto.
 apply ltT_eqTr with (a := multTerm (A:=A) multA (n:=n) (T1 A1 n) b); auto.
 apply (eqT_sym A n); apply (eqTerm_imp_eqT A eqA);
- apply T1_multTerm_l with (1 := cs); auto.
+ apply T1_multTerm_l; auto.
 apply multTerm_ltT_r with (1 := os); auto.
 elim
  (T1_is_min_ltT A A1)
@@ -64,7 +64,7 @@ Theorem divP_ltT_comp :
  forall (a b : Term A n) (p : list (Term A n)),
  canonical A0 eqA ltM (pX b p) ->
  divP A A0 eqA multA divA n a b -> canonical A0 eqA ltM (pX a p).
-Proof using plusA os minusA ltM_dec invA cs A1.
+Proof using os eqA_dec ltM_dec cs.
 intros a b p; case p; auto.
 intros H' H'0.
 change (canonical A0 eqA ltM (pX a (pO A n))) in |- *; apply canonicalp1;
@@ -129,7 +129,7 @@ Theorem canonical_spminusf :
  canonical A0 eqA ltM (spminusf a b nZb p q).
 Proof using plusA os cs.
 unfold spminusf in |- *.
-intros a b nZb p q H' H'0 H'1; apply canonical_minuspf with (1 := cs); auto.
+intros a b nZb p q H' H'0 H'1; apply canonical_minuspf; auto.
 Qed.
 
 Local Hint Resolve canonical_spminusf : core.
@@ -154,7 +154,7 @@ intros H'0 H'1;
                    (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=b)
                       nZb) q))); auto.
 apply minuspf_inv3a with (1 := cs); auto.
-apply minuspf_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
 apply
  canonical_pX_eqT
   with
@@ -264,7 +264,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=b)
                         nZb) r)) q)); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -277,7 +277,7 @@ apply
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=b)
                         nZb) r))) q); apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
  auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 Qed.
 
 Local Hint Resolve spminusf_pluspf : core.
@@ -402,7 +402,7 @@ apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
                    (mults (A:=A) multA (n:=n)
                       (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                          (b:=c) nZc) r)))); [ auto | idtac ].
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -422,7 +422,7 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))); [ auto | idtac ].
-apply pluspf_assoc with (1 := cs); auto.
+apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -500,7 +500,7 @@ apply
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply pluspf_assoc with (1 := cs); auto.
+apply pluspf_assoc; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
  apply
   (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -515,7 +515,7 @@ apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
                    (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
                       (plusTerm (A:=A) plusA (n:=n) a b) (b:=c) nZc) r)));
  [ auto | idtac ].
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -528,7 +528,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                      nZc) r))).
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -537,11 +537,11 @@ apply
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c) nZc)
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c) nZc))
             r).
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply eqT_divTerm_plusTerm with (1 := cs); auto.
 inversion H'2; auto.
 inversion H'3; auto.
-apply mults_dist1 with (1 := cs); auto.
+apply mults_dist1; auto.
 inversion H'2; inversion H'3; auto.
 apply
  nzeroP_comp_eqTerm
@@ -576,8 +576,8 @@ apply
                (multTerm (A:=A) multA (n:=n) a
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                      nZc)) q)); [ auto | idtac ].
-apply minuspf_comp with (1 := cs); auto.
-apply canonical_mults with (1 := cs); auto.
+apply minuspf_comp; auto.
+apply canonical_mults; auto.
 apply
  nzeroP_comp_eqTerm
   with
@@ -586,7 +586,7 @@ apply
             (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c) nZc));
  auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
- apply divTerm_multTerm_l with (1 := cs).
+ apply divTerm_multTerm_l.
 inversion H'1; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -718,7 +718,7 @@ apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
                 (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                 (spminusf (invTerm (A:=A) invA (n:=n) a) b nZb q r)));
  [ auto | idtac ].
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -742,8 +742,8 @@ apply eqTerm_spminusf_com; auto.
 apply
  (divP_trans _ _ _ _ _ _ _ _ _ cs n) with (y := invTerm (A:=A) invA (n:=n) a);
  auto.
-apply divTerm_multTermr with (1 := cs); auto.
-apply nZero_invTerm_nZero with (1 := cs); auto.
+apply divTerm_multTermr; auto.
+apply nZero_invTerm_nZero; auto.
 apply divP_inv1 with (1 := H'2); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -754,7 +754,7 @@ apply
                q) r); auto.
 apply eqp_spminusf_com; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply divP_invTerm_l with (1 := cs); auto.
+apply divP_invTerm_l; auto.
 apply divP_eqTerm_comp with (a := invTerm (A:=A) invA (n:=n) a) (1 := cs);
  auto.
 apply eqTerm_spminusf_com; auto.
@@ -808,7 +808,7 @@ apply
   with
     (a := plusTerm (A:=A) plusA (n:=n) a (invTerm (A:=A) invA (n:=n) b))
     (1 := cs); auto.
-apply divP_plusTerm with (1 := cs); auto.
+apply divP_plusTerm; auto.
 apply (eqT_trans A n) with (1 := H'1); auto.
 apply
  nzeroP_comp_eqTerm with (1 := cs) (a := minusTerm (A:=A) minusA (n:=n) a b);
@@ -881,7 +881,7 @@ apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
              (mults (A:=A) multA (n:=n)
                 (invTerm (A:=A) invA (n:=n) (T1 A1 n)) 
                 (spminusf b c nZc q r))); [ auto | idtac ].
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -901,7 +901,7 @@ apply
                q) r); [ auto | auto ].
 apply eqTerm_spminusf_com; auto.
 apply (divP_trans _ _ _ _ _ _ _ _ _ cs n) with (y := b); auto.
-apply divTerm_multTermr with (1 := cs); auto.
+apply divTerm_multTermr; auto.
 inversion H'3; auto.
 apply eqTerm_spminusf_com; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
@@ -956,7 +956,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply minuspf_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -998,8 +998,8 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))); [ auto | idtac ].
-apply eqp_pluspf_com with (1 := cs); auto.
-apply canonical_mults with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
+apply canonical_mults; auto.
 apply canonical_pluspf; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1024,7 +1024,7 @@ apply
                         (mults (A:=A) multA (n:=n)
                            (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                               (b:=c) nZc) r)))))).
-apply pluspf_assoc with (1 := cs); auto.
+apply pluspf_assoc; auto.
 apply canonical_pluspf; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1049,12 +1049,11 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
 apply canonical_pluspf; auto.
 apply canonical_pluspf; auto.
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1078,10 +1077,10 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
 apply canonical_pluspf; auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1103,8 +1102,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1124,7 +1122,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1138,8 +1136,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c)
                      nZc) r))).
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1160,7 +1157,7 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))).
-apply pluspf_assoc with (1 := cs); auto.
+apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1177,9 +1174,9 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_mults; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1194,8 +1191,8 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply eqp_pluspf_com with (1 := cs); auto.
-apply canonical_mults with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
+apply canonical_mults; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1204,8 +1201,8 @@ apply
             (minuspf A A0 A1 eqA invA minusA multA eqA_dec n ltM ltM_dec p q)
             (mults (A:=A) multA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                (pO A n))).
-apply eqp_pluspf_com with (1 := cs); auto.
-apply mults_comp with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
+apply mults_comp; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply mults_pO with (1 := cs); auto.
 2: simpl in |- *; auto.
 apply
@@ -1240,7 +1237,7 @@ apply
             (invTerm (A:=A) invA (n:=n)
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c) nZc)));
  auto.
-apply eqTerm_plusTerm_comp with (1 := cs); auto.
+apply eqTerm_plusTerm_comp; auto.
 apply eqT_divTerm; auto.
 apply (eqT_trans A n) with (1 := H'4); auto.
 apply
@@ -1301,7 +1298,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1321,7 +1318,7 @@ apply
                      (mults (A:=A) multA (n:=n)
                         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b
                            (b:=c) nZc) r))))).
-apply pluspf_assoc with (1 := cs); auto.
+apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1341,11 +1338,10 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
 apply canonical_pluspf; auto.
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1365,10 +1361,10 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
 apply canonical_pluspf; auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1386,8 +1382,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                      nZc) r))).
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1405,7 +1400,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                      nZc) r))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_pluspf; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1417,8 +1412,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c)
                      nZc) r))).
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply pluspf_assoc; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1438,7 +1432,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply pluspf_assoc with (1 := cs); auto.
+apply pluspf_assoc; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1454,7 +1448,7 @@ apply
                   (mults (A:=A) multA (n:=n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) b (b:=c)
                         nZc) r)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1464,8 +1458,8 @@ apply
                ltM_dec p q)
             (mults (A:=A) multA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                (pO A n))).
-apply eqp_pluspf_com with (1 := cs); auto.
-apply mults_comp with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
+apply mults_comp; auto.
 2: simpl in |- *; auto.
 cut
  (eqTerm (A:=A) eqA (n:=n)
@@ -1484,7 +1478,7 @@ apply
                (invTerm (A:=A) invA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c)
                      nZc)) r)).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1497,7 +1491,7 @@ apply
                   (multTerm (A:=A) multA (n:=n) (T1 A1 n)
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c)
                         nZc))) r)).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -1510,7 +1504,7 @@ apply
                   (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c)
                      nZc)) r)).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1523,8 +1517,8 @@ apply
                (mults (A:=A) multA (n:=n)
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=c)
                      nZc) r))).
-apply eqp_pluspf_com with (1 := cs); auto.
-apply mults_invTerm with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
+apply mults_invTerm; auto.
 inversion H'2; inversion H'3; auto.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1532,7 +1526,7 @@ apply
     (y := divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
             (invTerm (A:=A) invA (n:=n) a) (b:=c) nZc); 
  auto.
-apply eqTerm_divTerm_comp with (1 := cs); auto.
+apply eqTerm_divTerm_comp; auto.
 apply zerop_is_eqTerm with (1 := cs); auto.
 apply (eqT_sym A n); apply (eqT_trans A n) with (2 := H'4); auto;
  apply (eqT_sym A n); auto.
@@ -1550,7 +1544,7 @@ apply
  zeroP_comp_eqTerm with (1 := cs) (a := plusTerm (A:=A) plusA (n:=n) a b);
  auto.
 apply plusTerm_com with (1 := cs); auto.
-apply eqTerm_plusTerm_comp with (1 := cs); auto.
+apply eqTerm_plusTerm_comp; auto.
 apply (eqT_sym A n); auto.
 apply (eqT_sym A n); apply (eqT_trans A n) with (2 := H'4); auto;
  apply (eqT_sym A n); auto.
@@ -1566,7 +1560,7 @@ Theorem ltP_divP_pX :
  canonical A0 eqA ltM (pX a p) ->
  canonical A0 eqA ltM (pX b q) ->
  divP A A0 eqA multA divA n a b -> ltP (A:=A) (n:=n) ltM q (pX a p).
-Proof using plusA os minusA ltM_dec invA cs A1.
+Proof using os eqA_dec ltM_dec cs.
 intros a b p; case p; auto.
 intros q H' H'0 H'1; try assumption.
 change (ltP (A:=A) (n:=n) ltM q (pX a (pO A n))) in |- *; auto.

@@ -1,8 +1,9 @@
 (* This code is copyrighted by its authors; it is distributed under  *)
 (* the terms of the LGPL license (see LICENSE and description files) *)
 
-From Coq Require Import Lexicographic_Exponentiation Relation_Definitions.
-From Coq Require Import Inverse_Image Inclusion List Relation_Operators.
+From Stdlib Require Import Lexicographic_Exponentiation.
+From Stdlib Require Import Relation_Definitions.
+From Stdlib Require Import Inverse_Image Inclusion List Relation_Operators.
 From Buchberger Require Import Relation_Operators_compat Monomials.
 From Buchberger Require Import Term CoefStructure OrderStructure.
 
@@ -458,7 +459,7 @@ Qed.
  
 Theorem canonical_nzeroP :
  forall a p, canonical (pX a p) -> ~ zeroP (A:=A) A0 eqA (n:=n) a.
-Proof.
+Proof using plusA minusA invA eqA_dec cs.
 intros a p H'; red in |- *; intros H'0; inversion H'.
 generalize H0; simpl in |- *; intuition; auto.
 Qed.
@@ -468,7 +469,7 @@ Theorem canonical_cons :
  ltT b a ->
  ~ zeroP (A:=A) A0 eqA (n:=n) a ->
  canonical (pX b l) -> canonical (pX a (pX b l)).
-Proof.
+Proof using plusA minusA invA eqA_dec cs.
 intros l a b H' H'0 H'1; split; simpl in |- *; auto.
 apply olist_cons; auto.
 repeat split; auto.
@@ -480,7 +481,7 @@ Theorem canonical_pX_eqT :
  forall a b p,
  canonical (pX a p) ->
  eqT a b -> ~ zeroP (A:=A) A0 eqA (n:=n) b -> canonical (pX b p).
-Proof.
+Proof using plusA minusA invA eqA_dec cs.
 intros a b p H' H'0 H'1.
 split; auto.
 apply olist_pX_eqT with (a := a); auto.
@@ -497,7 +498,7 @@ Qed.
  
 Theorem canonical_imp_canonical :
  forall l a, canonical (pX a l) -> canonical l.
-Proof.
+Proof using plusA minusA invA eqA_dec cs eqA_dec.
 intros l a H'.
 split; auto.
 apply olist_X with (a := a); auto.
@@ -506,7 +507,7 @@ Qed.
  
 Theorem canonical_skip_fst :
  forall l a b, canonical (pX a (pX b l)) -> canonical (pX a l).
-Proof using os.
+Proof using os plusA minusA invA eqA_dec cs eqA_dec.
 intros l a b H'; split; auto.
 apply olist_imp_olist with (b := b); auto.
 inversion H'.
@@ -541,7 +542,7 @@ Qed.
 Theorem canonical_imp_in_nzero :
  forall p : list (Term A n),
  canonical p -> forall a : Term A n, In a p -> ~ zeroP (A:=A) A0 eqA (n:=n) a.
-Proof.
+Proof using plusA minusA invA eqA_dec cs eqA_dec.
 intros p; elim p; auto.
 intros a l H' H'0 a0 H'1; elim H'1; auto.
 intros H'2; rewrite <- H'2.

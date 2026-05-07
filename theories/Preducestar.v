@@ -162,7 +162,7 @@ apply well_founded_induction_type with (1 := sltp_wf _ A0 eqA _ ltM os).
 intros x; case x.
 intros x0; case x0.
 intros o H'; simpl in |- *.
-exists (mks (pO A n) (canonicalpO A A0 eqA n ltM)); simpl in |- *; auto.
+exists (mks (pO A n) canonicalpO); simpl in |- *; auto.
 apply reducestar0; auto.
 apply Rstar_0; auto.
 apply pO_irreducible; auto.

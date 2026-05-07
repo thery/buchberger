@@ -31,7 +31,7 @@ Theorem minuspf_in :
  canonical A0 eqA ltM (pX b q) ->
  In a
    (minuspf A A0 A1 eqA invA minusA multA eqA_dec n ltM ltM_dec p (pX b q)).
-Proof using os.
+Proof using cs os.
 intros p; elim p; simpl in |- *; auto.
 intros q a b H'; elim H'; auto.
 intros a l H' q a0 b H'0 H'1 H'2 H'3.
@@ -186,7 +186,7 @@ intros a0 l H' H'0 H'1.
 apply canonical_pluspf; auto.
 apply canonicalp1; auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a0); auto.
-apply (canonical_nzeroP A A0 eqA n ltM) with (p := l); auto.
+apply (canonical_nzeroP n ltM) with (p := l); auto.
 apply H'; auto.
 apply canonical_imp_canonical with (a := a0); auto.
 Qed.
@@ -249,7 +249,7 @@ apply
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 rewrite pluspf_inv1_eqa; auto.
 apply canonicalp1; auto.
-apply (canonical_nzeroP A A0 eqA n ltM) with (p := l); auto.
+apply (canonical_nzeroP n ltM) with (p := l); auto.
 inversion H'2; auto.
 auto.
 auto.
@@ -431,7 +431,7 @@ change
         (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=b) nZb)
         (pX a1 p1))) in |- *; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
- apply divTerm_multTerm_r with (1 := cs); auto.
+ apply divTerm_multTerm_r; auto.
 Qed.
 
 Theorem Rminus_is_mult :
@@ -514,9 +514,9 @@ apply
                      (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a
                         (b:=a0) nZa0) q)))).
 2: apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
- apply mults_dist_pluspf with (1 := cs); auto.
+ apply mults_dist_pluspf; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -527,7 +527,7 @@ apply
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=a0)
                      nZa0) q))).
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply minuspf_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -535,8 +535,8 @@ apply
             (mults (A:=A) multA (n:=n)
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=a0) nZa0)
                q) (Dmult a0 nZa0 l q)).
-apply pluspf_com with (1 := cs); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply pluspf_com; auto.
+apply eqp_pluspf_com; auto.
 apply divp_is_multTerm; auto.
 auto.
 Qed.
@@ -582,7 +582,7 @@ cut
  [ intros Op1 | auto ].
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a0);
  [ intros Z0 | apply canonical_nzeroP with (ltM := ltM) (p := l); auto ].
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -591,7 +591,7 @@ apply
                (multTerm (A:=A) multA (n:=n) a a0) (b:=a) nZa) q).
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n).
 apply divp_is_multTerm; auto.
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -641,7 +641,7 @@ apply
 apply Rminus_is_mult; auto.
 generalize Op0; elim p; simpl in |- *; auto.
 intros a0 l H'1 H'2; split; auto.
-apply divTerm_multTerml with (1 := cs); auto.
+apply divTerm_multTerml; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l); auto.
 apply H'1.
 apply canonical_imp_canonical with (a := a0); auto.
@@ -653,7 +653,7 @@ apply
                (mults (A:=A) multA (n:=n) b p)
                (mults (A:=A) multA (n:=n) a q))
             (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (pX b q))).
-apply minuspf_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
 apply Dmult_is_mulpf; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -663,7 +663,7 @@ apply
                (mults (A:=A) multA (n:=n) b p)
                (mults (A:=A) multA (n:=n) a q))
             (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p (pX b q))).
-apply minuspf_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -738,7 +738,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                   (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p q)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -772,7 +772,7 @@ apply
                (mults (A:=A) multA (n:=n)
                   (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                   (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p q)))).
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -789,7 +789,7 @@ apply
                   (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                   (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p q)))).
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -802,8 +802,8 @@ apply
                   (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                   (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p q))));
  [ auto | idtac ].
-apply eqp_pluspf_com with (1 := cs); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
+apply eqp_pluspf_com; auto.
 apply minuspf_refl with (1 := cs); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -893,7 +893,7 @@ Theorem multTerm_or_z_d1 :
  eqT c
    (multTerm (A:=A) multA (n:=n)
       (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) c (b:=b) nZb) b).
-Proof using plusA os minusA invA cs A1.
+Proof using os cs eqA_dec.
 intros a b nZb p; elim p; simpl in |- *; auto.
 intros H' c H'0; elim H'0; auto.
 intros a0 l H' H'0 c H'1; elim H'1;
@@ -934,7 +934,7 @@ Theorem multTerm_or_z_d2 :
  eqT c
    (multTerm (A:=A) multA (n:=n)
       (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) c (b:=b) nZb) b).
-Proof using plusA os minusA invA cs A1.
+Proof using os cs eqA_dec.
 intros a b H' p; elim p; simpl in |- *; auto.
 intros H'0 c H'1; elim H'1.
 intros a0 l H'0 H'1 c H'2; elim H'2;
@@ -1046,7 +1046,7 @@ apply
             (mults (A:=A) multA (n:=n) b p)); auto.
 apply Rminus_is_reduceplus; auto.
 apply divPp_mults1; auto.
-intros b0 H'2; apply (canonical_imp_in_nzero A A0 eqA n ltM p); auto.
+intros b0 H'2; apply canonical_imp_in_nzero with (1 := cs) (p := p) (3 := Op0); auto.
 red in |- *; intros a0 H'2; apply in_minuspf_spoly_in; auto.
 apply sp_Rminus; auto; auto.
 Qed.
@@ -1102,7 +1102,7 @@ apply
                (pX b1 q1))); auto.
 apply reduce_imp_reduceplus with (1 := cs); auto.
 apply minus_is_reduce; auto.
-apply in_multpf_head; auto.
+apply in_multpf_head with (1 := cs); auto.
 cut
  (eqTerm (A:=A) eqA (n:=n)
     (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
@@ -1164,7 +1164,7 @@ apply
     (y := pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
             (multpf A A0 eqA plusA multA eqA_dec n ltM ltM_dec p1 (pX b1 q1))
             (pO A n)); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply minuspf_refl with (1 := cs); auto.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -1227,7 +1227,7 @@ apply
             (pO A n)); auto.
 apply reduceplus_mults with (1 := cs); auto.
 apply spoly_reduceplus_pO; auto.
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply multpf_com with (1 := cs); auto.
 Qed. 
 
@@ -1239,7 +1239,7 @@ Theorem spoly_Reducestar_pO :
  inPolySet A A0 eqA n ltM (pX b q) Q ->
  inPolySet A A0 eqA n ltM (pX a p) Q ->
  reduceplus A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q
-   (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec 
+   (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec 
       (pX a p) (pX b q) Cpxa Cpxb) (pO A n).
 Proof using plusA os cs.
 intros Q a b H' p q Cpxb Cpxa H'0 H'1.
@@ -1262,7 +1262,7 @@ apply
     (1 := cs); auto.
 apply divP_on_eqT_eqT; auto.
 apply (eqT_sym A n); auto.
-2: apply spolyf_canonical with (1 := cs); auto.
+2: apply spolyf_canonical; auto.
 2: apply canonical_nzeroP with (ltM := ltM) (p := q); auto.
 2: apply canonical_nzeroP with (ltM := ltM) (p := p); auto.
 apply
@@ -1326,17 +1326,17 @@ apply
                   (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
                      (ppc (A:=A) A1 (n:=n) a b) (b:=b) nZb)) q)); 
  auto.
-apply minuspf_comp with (1 := cs); auto.
-apply mults_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
+apply mults_comp; auto.
 apply divP_comp_ppc0 with (1 := cs); auto.
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply divP_comp_ppc1 with (1 := cs); auto.
-apply minuspf_comp with (1 := cs); auto.
+apply minuspf_comp; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
  apply mults_comp_minuspf with (1 := cs); auto.
-apply mults_comp with (1 := cs); auto.
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply spolyf_def with (1 := cs); auto.
+apply mults_comp; auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply spolyf_def; auto.
 Qed.
 
 Theorem spoly_Reducestar_ppc :
@@ -1347,7 +1347,7 @@ Theorem spoly_Reducestar_ppc :
  inPolySet A A0 eqA n ltM (pX b q) Q ->
  inPolySet A A0 eqA n ltM (pX a p) Q ->
  reducestar A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q
-   (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec 
+   (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec n ltM ltM_dec 
       (pX a p) (pX b q) Cpxa Cpxb) (pO A n).
 Proof using plusA os cs.
 intros Q a b H' p q Cpxb Cpxa H'0 H'1.

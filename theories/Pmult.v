@@ -35,7 +35,7 @@ Proof using os minusA invA divA cs A1.
 intros l1; elim l1; simpl in |- *; auto.
 intros a l H' l2 H'0 H'1; try assumption.
 apply canonical_pluspf; auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_mults; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l); auto.
 apply H'; auto.
 apply canonical_imp_canonical with (a := a); auto.
@@ -115,7 +115,7 @@ apply
             (pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM)
                ltM_dec (mults (A:=A) multA (n:=n) a p) 
                (multpf p q))); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 change (canonical A0 eqA ltM (mults (A:=A) multA (n:=n) b (pX a q))) in |- *;
  auto.
 change (canonical A0 eqA ltM (mults (A:=A) multA (n:=n) b (pX a q))) in |- *;
@@ -134,7 +134,7 @@ cut
  (canonical A0 eqA ltM
     (pX (multTerm (A:=A) multA (n:=n) b a) (mults (A:=A) multA (n:=n) b q)));
  [ intros Op4 | idtac ]; auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply pluspf_pX; auto.
 change (canonical A0 eqA ltM (mults (A:=A) multA (n:=n) b (pX a q))) in |- *;
  auto.
@@ -191,7 +191,7 @@ apply
                ltM_dec (mults (A:=A) multA (n:=n) b q) 
                (multpf p q))); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 change (canonical A0 eqA ltM (mults (A:=A) multA (n:=n) a (pX b p))) in |- *;
  auto.
 apply
@@ -212,7 +212,7 @@ Theorem multpf_head :
  canonical A0 eqA ltM (pX b q) ->
  exists c : list (Term A n),
    multpf (pX a p) (pX b q) = pX (multTerm (A:=A) multA (n:=n) a b) c.
-Proof using os.
+Proof using os cs.
 intros p; elim p; clear p; auto.
 simpl in |- *; intros q a b H' H'0.
 cut (canonical A0 eqA ltM q);
@@ -238,7 +238,7 @@ Theorem in_multpf_head :
  canonical A0 eqA ltM (pX a p) ->
  canonical A0 eqA ltM (pX b q) ->
  In (multTerm (A:=A) multA (n:=n) a b) (multpf (pX a p) (pX b q)).
-Proof using os.
+Proof using os cs.
 intros p q a b H' H'0.
 elim (multpf_head p q a b); [ intros c E; rewrite E | idtac | idtac ];
  simpl in |- *; auto.
@@ -253,7 +253,7 @@ Theorem multpf_comp :
  canonical A0 eqA ltM r ->
  canonical A0 eqA ltM s ->
  eqP A eqA n q s -> eqP A eqA n (multpf p q) (multpf r s).
-Proof using os minusA invA divA cs A1.
+Proof using os cs.
 intros p r H'; elim H'; simpl in |- *; auto.
 intros ma mb p0 q H'0 H'1 H'2 q0 s H'3 H'4 H'5 H'6 H'7.
 cut (canonical A0 eqA ltM p0);
@@ -271,7 +271,7 @@ Theorem multpf_com :
  forall p q : list (Term A n),
  canonical A0 eqA ltM p ->
  canonical A0 eqA ltM q -> eqP A eqA n (multpf p q) (multpf q p).
-Proof using os minusA invA divA cs A1.
+Proof using os cs.
 intros p; elim p; simpl in |- *; auto.
 intros q; elim q; simpl in |- *; auto.
 intros a l H' H'0 H'1.
@@ -320,7 +320,7 @@ Theorem multpf_dist_plusr :
          q) r)
    (pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
       (multpf p r) (multpf q r)).
-Proof using os minusA invA divA cs A1.
+Proof using os cs.
 intros p q r; elim r.
 intros H' H'0 H'1 H'2.
 apply
@@ -337,7 +337,7 @@ apply
             (multpf (pO A n) p) (multpf (pO A n) q)); 
  auto.
 simpl in |- *; apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply eqp_pluspf_com with (1 := cs); auto; apply multpf_com; auto.
+apply eqp_pluspf_com; auto; apply multpf_com; auto.
 intros a l H' H'0 H'1 H'2 H'3.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a);
  [ intros nZ0 | apply canonical_nzeroP with (ltM := ltM) (p := l) ]; 
@@ -430,7 +430,7 @@ apply
                ltM_dec (mults (A:=A) multA (n:=n) a q) 
                (multpf q l))); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 change
   (eqP A eqA n
      (pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
@@ -456,7 +456,7 @@ Theorem multpf_dist_plusl :
          r))
    (pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
       (multpf p q) (multpf p r)).
-Proof using os minusA invA divA cs A1.
+Proof using os cs.
 intros p q r H' H'0 H'1 H'2.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -471,7 +471,7 @@ apply
     (y := pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
             (multpf q p) (multpf r p)); auto.
 apply multpf_dist_plusr; auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply multpf_com; auto.
 apply multpf_com; auto.
 Qed.
@@ -499,7 +499,7 @@ apply
             (mults (A:=A) multA (n:=n) a (mults (A:=A) multA (n:=n) a0 q))
             (mults (A:=A) multA (n:=n) a (multpf l q))); 
  auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 Qed.
 
@@ -524,7 +524,7 @@ apply
     (y := pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
             (multpf (mults (A:=A) multA (n:=n) a q) r)
             (multpf (multpf l q) r)); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply multpf_smultm_assoc; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply multpf_dist_plusr; auto.

@@ -9,7 +9,7 @@
                                                                            
   ************************************************************************** *)
 
-From Coq Require Import Relation_Definitions.
+From Stdlib Require Import Relation_Definitions.
 From Buchberger Require Import CoefStructure moreCoefStructure.
 From Buchberger Require Import OrderStructure Monomials.
 
@@ -219,7 +219,7 @@ Proof using multA minusA invA divA cs A1 A0.
 intros a b c; case a; case b; case c; simpl in |- *; auto.
 intuition.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs).
-apply plusA_assoc with (1 := cs).
+apply plusA_assoc.
 Qed.
  
 Theorem eqTerm_plusTerm_comp :
@@ -333,8 +333,7 @@ Theorem plusTerm_invTerm_zeroP :
  forall a : Term, zeroP (plusTerm a (invTerm a)).
 Proof using multA minusA divA cs A1.
 intros a; case a; simpl in |- *; auto.
-intros; apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); apply invA_plusA with (1 := cs);
- auto.
+intros; apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); apply invA_plusA; auto.
 Qed.
  
 Theorem zeroP_invTerm_zeroP : forall a : Term, zeroP a -> zeroP (invTerm a).
@@ -402,8 +401,8 @@ intros a0 m a1 m0 H'; elim H'; intros H'0 H'1; rewrite H'1; clear H'; auto.
 split; auto.
 apply (eqA_trans _ _ _ _ _ _ _ _ _ cs) with (y := multA A1 a0); auto.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs).
-apply multA_A1_l with (1 := cs); auto.
-apply multA_eqA_comp with (1 := cs); auto.
+apply multA_A1_l; auto.
+apply multA_eqA_comp; auto.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); auto.
 apply sym_eq; unfold M1 in |- *; apply mult_mon_zero_l.
 Qed.
@@ -416,7 +415,7 @@ intros a0 m a1 m0 H'; elim H'; intros H'0 H'1; rewrite H'1; clear H'.
 split; auto.
 apply (eqA_trans _ _ _ _ _ _ _ _ _ cs) with (y := multA a0 A1); auto.
 apply (eqA_trans _ _ _ _ _ _ _ _ _ cs) with (y := multA A1 a0); auto.
-apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); apply multA_A1_l with (1 := cs); auto.
+apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); apply multA_A1_l; auto.
 apply (eqA_sym _ _ _ _ _ _ _ _ _ cs); auto.
 apply sym_eq; unfold M1 in |- *; apply mult_mon_zero_r.
 Qed.
@@ -450,7 +449,7 @@ apply
  (eqA_trans _ _ _ _ _ _ _ _ _ cs)
   with (plusA (multA (plusA (invA a1) a1) a0) (invA (multA a1 a0))); 
  auto.
-apply plusA_eqA_comp with (1 := cs); auto.
+apply plusA_eqA_comp; auto.
 apply
  (eqA_trans _ _ _ _ _ _ _ _ _ cs)
   with (plusA (multA a0 (invA a1)) (multA a0 a1)); 

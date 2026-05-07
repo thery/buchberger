@@ -9,8 +9,8 @@
                                                                            
    ************************************************************************ *)
 
-From Coq Require Import Arith Compare Compare_dec Peano_dec.
-From Coq Require Import Relation_Definitions EqdepFacts Eqdep_dec.
+From Stdlib Require Import Arith Compare Compare_dec Peano_dec.
+From Stdlib Require Import Relation_Definitions EqdepFacts Eqdep_dec.
 
 Set Default Proof Using "Type".
 

@@ -9,7 +9,7 @@
                                                                            
    ************************************************************************** *)
 
-From Coq Require Import List.
+From Stdlib Require Import List.
 From Buchberger Require Import ListProps Bar Dickson Monomials.
 From Buchberger Require Export BuchAux.
 

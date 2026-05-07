@@ -9,8 +9,8 @@
                                                                            
   ************************************************************************** *)
 
-From Coq Require Export Relation_Definitions List.
-From Coq Require Import Arith Compare_dec.
+From Stdlib Require Export Relation_Definitions List.
+From Stdlib Require Import Arith Compare_dec.
 From Buchberger Require Export CoefStructure OrderStructure POrder Monomials Term.
 
 Set Default Proof Using "Type".
@@ -175,7 +175,7 @@ Theorem ltp_eqp_comp :
  ltP (A:=A) (n:=n) ltM p q ->
  canonical A0 eqA ltM p ->
  canonical A0 eqA ltM q -> eqP p r -> eqP q s -> ltP (A:=A) (n:=n) ltM r s.
-Proof.
+Proof using plusA multA minusA invA eqA_dec divA cs.
 intros p q r s H'; generalize r s; elim H'; clear r s H'; auto.
 intros x p0 r s H H0 H1; inversion H1.
 intros H4; inversion H4; apply ltPO.
@@ -204,14 +204,14 @@ apply canonical_pX_eqT with (a := ma); auto.
 apply ltP_pX_canonical; auto.
 apply H'2.
 apply canonical_imp_canonical with (a := ma); auto.
-apply (canonical_nzeroP A A0 eqA n ltM ma p0); auto.
+apply (canonical_nzeroP n ltM ma p0); auto.
 apply ltp_eqp_comp with (p := p0) (q := pX ma (pO A n)); auto.
 apply canonical_pX_ltP with (1 := H'3).
 apply canonical_imp_canonical with (a := ma); auto.
 apply canonicalp1; auto.
-apply (canonical_nzeroP A A0 eqA n ltM ma p0); auto.
+apply (canonical_nzeroP n ltM ma p0); auto.
 apply nzeroP_comp_eqTerm with (1 := cs) (a := ma); auto.
-apply (canonical_nzeroP A A0 eqA n ltM ma p0); auto.
+apply (canonical_nzeroP n ltM ma p0); auto.
 Qed.
 
 Definition sizel3

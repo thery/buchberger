@@ -137,7 +137,7 @@ apply
   with (y := minuspf A A0 A1 eqA invA minusA multA eqA_dec n ltM ltM_dec l l);
  auto.
 apply minuspf_refl with (1 := cs); auto.
-apply (canonical_nzeroP A A0 eqA n ltM) with (p := l); auto.
+apply (canonical_nzeroP n ltM) with (p := l); auto.
 apply inPolySet_imp_canonical with (L := Q); auto.
 Qed.
 
@@ -257,7 +257,7 @@ apply
             (spminusf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM
                ltM_dec a b0 nZb p q0))
     (1 := cs); auto.
-apply (canonical_pX_eqT A A0 eqA n ltM) with (a := a); auto.
+apply (canonical_pX_eqT eqA_dec n ltM) with (a := a); auto.
 apply canonical_spminusf_full_t with (1 := cs); auto.
 apply inPolySet_imp_canonical with (L := Q); auto.
 apply (eqTerm_imp_eqT A eqA n); auto.
@@ -347,8 +347,7 @@ apply
                ltM_dec (pX a (pO A n)) p0)
             (mults (A:=A) multA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))
                (mults (A:=A) multA (n:=n) a0 x))).
-apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply eqp_pluspf_com with (1 := cs);
- auto.
+apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); apply eqp_pluspf_com; auto.
 apply plusTerm_is_pX with (1 := cs); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -452,7 +451,7 @@ apply
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply spminusf_multTerm with (1 := cs); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -464,7 +463,7 @@ apply
   with (y := divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=a) H');
  auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply divTerm_multTerm_l with (1 := cs); auto.
+apply divTerm_multTerm_l; auto.
 apply divTerm_on_eqT with (1 := cs); auto.
 apply (eqT_sym A n); auto.
 apply
@@ -505,11 +504,11 @@ apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with (y := multTerm (A:=A) multA (n:=n) (T1 A1 n) a0); 
  auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply eqTerm_multTerm_comp; auto.
 apply divTerm_on_eqT with (1 := cs); auto.
 apply (eqT_sym A n); auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
- apply multTerm_assoc with (1 := cs); auto.
+ apply multTerm_assoc; auto.
 Qed.
 
 Theorem reduce_mults :
@@ -540,10 +539,10 @@ apply
             (multTerm (A:=A) multA (n:=n)
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=b) nZb)
                b)); [ auto | idtac ].
-apply multTerm_assoc with (1 := cs); auto.
-apply eqTerm_multTerm_comp with (1 := cs); auto.
+apply multTerm_assoc; auto.
+apply eqTerm_multTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
- apply divTerm_multTerm_l with (1 := cs); auto.
+ apply divTerm_multTerm_l; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with
@@ -554,7 +553,7 @@ apply spminusf_multTerm with (1 := cs); auto.
 apply canonical_imp_canonical with (a := a); auto.
 apply canonical_imp_canonical with (a := b); auto.
 apply inPolySet_imp_canonical with (L := Q); auto.
-apply nzeroP_multTerm with (1 := cs); auto.
+apply nzeroP_multTerm; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := p0); auto.
 intros a b p0 q0 H' H'0 H'1 a0 H'2 H'3.
 simpl in |- *; apply reduceskip; auto.
@@ -685,7 +684,7 @@ apply (eqT_trans A n) with (multTerm (A:=A) multA (n:=n) (T1 A1 n) a); auto.
 apply (eqTerm_imp_eqT A eqA n); auto.
 apply nzeroP_comp_eqTerm with (1 := cs) (a := invTerm (A:=A) invA (n:=n) a);
  auto.
-apply nZero_invTerm_nZero with (1 := cs); auto.
+apply nZero_invTerm_nZero; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := p0); auto.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -704,7 +703,7 @@ apply
                (invTerm (A:=A) invA (n:=n) (T1 A1 n))) l); 
  auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply mults_comp with (1 := cs); auto.
+apply mults_comp; auto.
 apply divP_eqT with (1 := cs) (a := a); auto.
 rewrite pX_invl with (1 := H'3); auto.
 apply (eqT_sym A n);
@@ -713,7 +712,7 @@ apply (eqT_sym A n);
 apply (eqTerm_imp_eqT A eqA n); auto.
 apply nzeroP_comp_eqTerm with (1 := cs) (a := invTerm (A:=A) invA (n:=n) a);
  auto.
-apply nZero_invTerm_nZero with (1 := cs); auto.
+apply nZero_invTerm_nZero; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := p0); auto.
 rewrite pX_invl with (1 := H'3); auto.
 apply
@@ -723,7 +722,7 @@ apply
        (invTerm (A:=A) invA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))) a0);
  auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n);
- apply mult_invTerm_com with (1 := cs); auto.
+ apply mult_invTerm_com; auto.
 apply
  (eqTerm_trans _ _ _ _ _ _ _ _ _ cs n)
   with (multTerm (A:=A) multA (n:=n) (T1 A1 n) a0);

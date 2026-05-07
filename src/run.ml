@@ -1,669 +1,894 @@
-type prop = unit
-let prop = ()
 
-type arity = unit
-let arity = ()
-
-type 'A list =
-    Nil
-  | Cons of 'A * 'A list
-
-let letP h h' =
-  h' h prop
-
-let acc_rec f =
-  let rec acc_rec0 x _ =
-    f x prop (fun y _ -> acc_rec0 y prop)
-  in acc_rec0
-
-let well_founded_induction _ h a =
-  acc_rec (fun x _ h1 -> h x h1) a prop
-
-type 'A sumor =
-    Inleft of 'A
-  | Inright
-
-type sumbool =
-    Left
-  | Right
-
-type ('A, 'B) prod =
-    Pair of 'A * 'B
-
-type nat =
-    O
-  | S of nat
-
-type mon =
-    N_0
-  | C_n of nat * nat * mon
+type __ = Obj.t
+let __ = let rec f _ = Obj.repr f in Obj.repr f
 
 type bool =
-    True
-  | False
+| True
+| False
 
-let le_lt_dec n =
-  let rec f = function
-    O -> (fun m -> Left)
-  | S n1 -> (fun m ->
-      let rec f0 = function
-        O -> Right
-      | S n3 -> (match f n1 n3 with
-                   Left -> Left
-                 | Right -> Right)
-      in f0 m)
-  in f n
+type nat =
+| O
+| S of nat
 
-let pmon1 d = function
-  N_0 -> O
-| C_n (d', n, p) -> n
+type ('a, 'b) prod =
+| Pair of 'a * 'b
 
-let pmon2 d = function
-  N_0 -> N_0
-| C_n (d', n, p) -> p
+type 'a list =
+| Nil
+| Cons of 'a * 'a list
 
-let minus x =
-  let rec minus0 n m =
+(** val app : 'a1 list -> 'a1 list -> 'a1 list **)
+
+let rec app l m =
+  match l with
+  | Nil -> m
+  | Cons (a, l1) -> Cons (a, (app l1 m))
+
+type 'a sig0 = 'a
+  (* singleton inductive, whose constructor was exist *)
+
+type sumbool =
+| Left
+| Right
+
+type 'a sumor =
+| Inleft of 'a
+| Inright
+
+(** val add : nat -> nat -> nat **)
+
+let rec add n m =
+  match n with
+  | O -> m
+  | S p -> S (add p m)
+
+(** val sub : nat -> nat -> nat **)
+
+let rec sub n m =
+  match n with
+  | O -> n
+  | S k -> (match m with
+            | O -> n
+            | S l -> sub k l)
+
+module Nat =
+ struct
+  (** val max : nat -> nat -> nat **)
+
+  let rec max n m =
     match n with
-      O -> O
-    | S k -> (match m with
-                O -> S k
-              | S l -> minus0 k l)
-  in minus0 x
+    | O -> m
+    | S n' -> (match m with
+               | O -> n
+               | S m' -> S (max n' m'))
 
-let div_mon_clean d =
-  let rec f = function
-    O -> (fun h' h'0 -> Pair (N_0, True))
-  | S n0 -> (fun s1 s2 ->
-      match le_lt_dec (pmon1 (S n0) s2) (pmon1 (S n0) s1) with
-        Left ->
-          (match f n0 (pmon2 (S n0) s1) (pmon2 (S n0) s2) with
-             Pair (res, b) -> Pair ((C_n (n0,
-               (minus (pmon1 (S n0) s1) (pmon1 (S n0) s2)), res)), b))
-      | Right -> Pair (s1, False))
-  in f d
+  (** val eq_dec : nat -> nat -> sumbool **)
 
-let mk_clean n a b =
-  div_mon_clean n a b
-
-let divTerm_dec a0 a1 plusA invA minusA multA divA _ n a b =
-  match a with
-    Pair (a2, m) ->
-      (match b with
-         Pair (b2, c2) -> (fun _ _ ->
-           match mk_clean n m c2 with
-             Pair (c, b4) ->
-               (match b4 with
-                  True -> Left
-                | False -> Right)))
-
-let divP_dec a0 a1 plusA invA minusA multA divA _ n a b _ _ =
-  match divTerm_dec a0 a1 plusA invA minusA multA divA prop n a b prop
-          prop with
-    Left -> Left
-  | Right -> Right
-
-let selectdivf a0 a1 plusA invA minusA multA divA _ n a _ q =
-  let rec f = function
-    Nil -> Inright
-  | Cons (a2, l0) ->
-      (match a2 with
-         Nil ->
-           (match f l0 with
-              Inleft h'1 -> Inleft h'1
-            | Inright -> Inright)
-       | Cons (a3, l1) ->
-           (match divP_dec a0 a1 plusA invA minusA multA divA prop n a
-                    a3 prop prop with
-              Left -> Inleft (Cons (a3, l1))
-            | Right ->
-                (match f l0 with
-                   Inleft hyp1 -> Inleft hyp1
-                 | Inright -> Inright)))
-  in f q
-
-let false_rec _ =
-  failwith "False_rec"
-
-let projsig1 h =
-  h
-
-let plus x =
-  let rec plus0 n m =
+  let rec eq_dec n m =
     match n with
-      O -> m
-    | S p -> S (plus0 p m)
-  in plus0 x
+    | O -> (match m with
+            | O -> Left
+            | S _ -> Right)
+    | S n0 -> (match m with
+               | O -> Right
+               | S n1 -> eq_dec n0 n1)
+ end
 
-let mult_mon d =
-  let rec f = function
-    O -> (fun h' h'0 -> N_0)
-  | S n0 -> (fun s1 s2 -> C_n (n0,
-      (plus (pmon1 (S n0) s1) (pmon1 (S n0) s2)),
-      (f n0 (pmon2 (S n0) s1) (pmon2 (S n0) s2))))
-  in f d
+(** val lt_eq_lt_dec : nat -> nat -> sumbool sumor **)
 
-let multTerm multA n = function
-  Pair (b2, c2) -> (fun h1' ->
-    match h1' with
-      Pair (b3, c3) -> Pair ((multA b2 b3), (mult_mon n c2 c3)))
+let rec lt_eq_lt_dec n m =
+  match n with
+  | O -> (match m with
+          | O -> Inleft Right
+          | S _ -> Inleft Left)
+  | S n0 -> (match m with
+             | O -> Inright
+             | S n1 -> lt_eq_lt_dec n0 n1)
 
-let mults multA n a p =
-  let rec f = function
-    Nil -> Nil
-  | Cons (a0, l0) -> Cons ((multTerm multA n a a0), (f l0))
-  in f p
+(** val le_lt_dec : nat -> nat -> sumbool **)
 
-let zero_mon d =
-  let rec f = function
-    O -> N_0
-  | S n0 -> C_n (n0, O, (f n0))
-  in f d
+let rec le_lt_dec n m =
+  match n with
+  | O -> Left
+  | S n0 -> (match m with
+             | O -> Right
+             | S n1 -> le_lt_dec n0 n1)
 
-let m1 n =
-  zero_mon n
+(** val le_lt_eq_dec : nat -> nat -> sumbool **)
 
-let t2M n = function
-  Pair (a, m) -> m
+let le_lt_eq_dec n m =
+  let s = lt_eq_lt_dec n m in
+  (match s with
+   | Inleft s0 -> s0
+   | Inright -> assert false (* absurd case *))
 
-let ltT_dec n ltM_dec x y =
-  ltM_dec (t2M n x) (t2M n y)
+type mon =
+| N_0
+| C_n of nat * nat * mon
 
-let minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec l =
-  well_founded_induction prop (fun x ->
-    match x with
-      Pair (l1, l2) ->
-        (match l1 with
-           Nil -> (fun h' ->
-             mults multA n (Pair ((invA a1), (m1 n))) l2)
-         | Cons (a2, m2) ->
-             (match l2 with
-                Nil -> (fun h' -> Cons (a2, m2))
-              | Cons (a3, m3) -> (fun h' ->
-                  match ltT_dec n ltM_dec a2 a3 with
-                    Inleft p ->
-                      (match p with
-                         Left -> Cons
-                           ((match a3 with
-                               Pair (b2, c2) -> Pair ((invA b2), c2)),
-                           (h' (Pair ((Cons (a2, m2)), m3)) prop))
-                       | Right -> Cons (a2,
-                           (h' (Pair (m2, (Cons (a3, m3)))) prop)))
-                  | Inright ->
-                      let orec = h' (Pair (m2, m3)) prop in
-                      letP
-                        (match a2 with
-                           Pair (b2, c2) ->
-                             (match a3 with
-                                Pair (b3, c3) -> Pair ((minusA b2 b3),
-                                  c2))) (fun u _ ->
-                        match match u with
-                                Pair (b, h'0) -> eqA_dec b a0 with
-                          Left -> orec
-                        | Right -> Cons (u, orec)))))) l
+(** val pmon1 : nat -> mon -> nat **)
 
-let minuspf a0 a1 invA minusA multA eqA_dec n ltM_dec l1 l2 =
-  projsig1
-    (minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec (Pair (l1, l2)))
+let pmon1 _ = function
+| N_0 -> O
+| C_n (_, n, _) -> n
 
-let div_mon d =
-  let rec f = function
-    O -> (fun h' h'0 -> N_0)
-  | S n0 -> (fun s1 s2 -> C_n (n0,
-      (minus (pmon1 (S n0) s1) (pmon1 (S n0) s2)),
-      (f n0 (pmon2 (S n0) s1) (pmon2 (S n0) s2))))
-  in f d
+(** val pmon2 : nat -> mon -> mon **)
 
-let divTerm a0 divA n = function
-  Pair (b2, c2) -> (fun h' ->
-    match h' with
-      Pair (b3, c3) -> (fun _ -> Pair ((divA b2 b3 prop),
-        (div_mon n c2 c3))))
+let pmon2 _ = function
+| N_0 -> N_0
+| C_n (_, _, m0) -> m0
 
-let spminusf a0 a1 invA minusA multA divA eqA_dec n ltM_dec a b _ p q =
-  minuspf a0 a1 invA minusA multA eqA_dec n ltM_dec p
-    (mults multA n (divTerm a0 divA n a b prop) q)
+(** val gen_mon : nat -> nat -> mon **)
 
-let reducef a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ q p =
-  well_founded_induction prop (fun x ->
-    match x with
-      Nil -> (fun h' -> Nil)
-    | Cons (a, l) -> (fun h' ->
-        match selectdivf a0 a1 plusA invA minusA multA divA prop n a
-                prop q with
-          Inleft div1 ->
-            (match div1 with
-               Nil -> false_rec prop
-             | Cons (a2, l0) ->
-                 h'
-                   (spminusf a0 a1 invA minusA multA divA eqA_dec n
-                     ltM_dec a a2 prop l l0) prop)
-        | Inright -> Cons (a, (h' l prop)))) p
+let rec gen_mon n n0 =
+  match n with
+  | O -> N_0
+  | S n1 ->
+    (match n0 with
+     | O -> C_n (n1, (S O), (gen_mon n1 n1))
+     | S n2 -> C_n (n1, O, (gen_mon n1 n2)))
 
-let unit a0 a1 divA n = function
-  Nil -> Pair (a1, (m1 n))
-| Cons (a, l) ->
-    (match a with
-       Pair (co, m) -> Pair ((divA a1 co prop), (m1 n)))
+(** val mult_mon : nat -> mon -> mon -> mon **)
 
-let nf a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ p l =
-  letP
-    (reducef a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec
-      prop l p) (fun u _ -> mults multA n (unit a0 a1 divA n u) u)
-
-let app x =
-  let rec app0 l m =
-    match l with
-      Nil -> m
-    | Cons (a, l1) -> Cons (a, (app0 l1 m))
-  in app0 x
-
-let redacc a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ h' =
-  let rec f = function
-    Nil -> (fun l0 -> Nil)
-  | Cons (a, l0) ->
-      let rec0 = f l0 in (fun acc ->
-      letP
-        (nf a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec
-          prop a (app l0 acc)) (fun u _ ->
-        match match u with
-                Nil -> Left
-              | Cons (a2, l1) -> Right with
-          Left -> rec0 acc
-        | Right -> Cons (u, (rec0 (Cons (u, acc))))))
-  in f h'
-
-let red a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ l =
-  redacc a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec prop
-    l Nil
-
-let prod_rec f = function
-  Pair (a, b) -> f a b
-
-let eq_nat_dec n =
-  let rec f = function
-    O -> (fun m ->
-      let rec f0 = function
-        O -> Left
-      | S n2 -> Right
-      in f0 m)
-  | S n1 -> (fun m ->
-      let rec f0 = function
-        O -> Right
-      | S n3 -> (match f n1 n3 with
-                   Left -> Left
-                 | Right -> Right)
-      in f0 m)
-  in f n
-
-let eqmon_dec d =
-  let rec f = function
-    O -> (fun x y -> Left)
-  | S n0 -> (fun x y ->
-      match eq_nat_dec (pmon1 (S n0) x) (pmon1 (S n0) y) with
-        Left ->
-          (match f n0 (pmon2 (S n0) x) (pmon2 (S n0) y) with
-             Left -> Left
-           | Right -> Right)
-      | Right -> Right)
-  in f d
-
-let eqT_dec n x y =
-  eqmon_dec n (t2M n x) (t2M n y)
-
-let max h' =
-  let rec f = function
-    O -> (fun n1 -> n1)
-  | S n0 -> (fun h0 -> match h0 with
-                         O -> S n0
-                       | S n2 -> S (f n0 n2))
-  in f h'
-
-let ppcm_mon d =
-  let rec f = function
-    O -> (fun m3 m2 -> N_0)
-  | S n0 -> (fun s1 s2 -> C_n (n0,
-      (max (pmon1 (S n0) s1) (pmon1 (S n0) s2)),
-      (f n0 (pmon2 (S n0) s1) (pmon2 (S n0) s2))))
-  in f d
-
-let ppc a1 n = function
-  Pair (b2, c2) -> (fun h' ->
-    match h' with
-      Pair (b3, c3) -> Pair (a1, (ppcm_mon n c2 c3)))
-
-let foreigner_dec a0 a1 multA n a = function
-  Nil -> Left
-| Cons (a2, l) ->
-    (match a with
-       Nil -> Left
-     | Cons (a3, l0) ->
-         eqT_dec n (ppc a1 n a2 a3) (multTerm multA n a2 a3))
-
-type 'A sig0 = 'A
-
-type 'A term = ('A, mon) prod
-
-type 'A poly = 'A term list sig0
-
-type 'A cpRes =
-    Keep of 'A poly list
-  | DontKeep of 'A poly list
-
-let divp_dec a0 a1 plusA invA minusA multA divA _ n a = function
-  Nil -> (match a with
-            Nil -> Right
-          | Cons (a2, l) -> Right)
-| Cons (t, l) ->
-    (match a with
-       Nil -> Right
-     | Cons (a2, l0) ->
-         divP_dec a0 a1 plusA invA minusA multA divA prop n a2 t prop
-           prop)
-
-let ppcp a0 a1 plusA invA minusA multA divA _ n = function
-  Nil -> (fun h'1 -> Nil)
-| Cons (a, l) -> (fun h'1 ->
-    match h'1 with
-      Nil -> Nil
-    | Cons (a2, l0) -> Cons ((ppc a1 n a a2), Nil))
-
-let slice a0 a1 plusA invA minusA multA divA _ n i a q =
-  let rec f = function
-    Nil ->
-      (match foreigner_dec a0 a1 multA n i a with
-         Left -> DontKeep Nil
-       | Right -> Keep Nil)
-  | Cons (a2, l0) ->
-      let rec0 = f l0 in
-      (match divp_dec a0 a1 plusA invA minusA multA divA prop n
-               (ppcp a0 a1 plusA invA minusA multA divA prop n i a) a2 with
-         Left -> DontKeep (Cons (a2, l0))
-       | Right ->
-           (match divp_dec a0 a1 plusA invA minusA multA divA prop n
-                    (ppcp a0 a1 plusA invA minusA multA divA prop n i
-                      a2) a with
-              Left -> rec0
-            | Right ->
-                (match rec0 with
-                   Keep h'0 -> Keep (Cons (a2, h'0))
-                 | DontKeep h'0 -> DontKeep (Cons (a2, h'0)))))
-  in f q
-
-let spolyf a0 a1 invA minusA multA divA eqA_dec n ltM_dec = function
-  Nil -> (fun p2 _ _ -> Nil)
-| Cons (a, p11) -> (fun p2 ->
-    match p2 with
-      Nil -> (fun _ _ -> Nil)
-    | Cons (b, p22) -> (fun _ _ ->
-        letP (ppc a1 n a b) (fun u _ ->
-          minuspf a0 a1 invA minusA multA eqA_dec n ltM_dec
-            (mults multA n (divTerm a0 divA n u a prop) p11)
-            (mults multA n (divTerm a0 divA n u b prop) p22))))
-
-let spolyp a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ p q =
-  spolyf a0 a1 invA minusA multA divA eqA_dec n ltM_dec q p prop prop
-
-let genPcPf0 a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ i aP =
-  well_founded_induction prop (fun aP0 ->
-    match aP0 with
-      Nil -> (fun h' r -> r)
-    | Cons (a, l1) -> (fun rec0 l ->
-        match slice a0 a1 plusA invA minusA multA divA prop n i a l1 with
-          Keep l2 ->
-            let rec f = function
-              Nil -> Cons
-                ((spolyp a0 a1 plusA invA minusA multA divA prop
-                   eqA_dec n ltM_dec prop i a), Nil)
-            | Cons (a2, l3) -> Cons (a2, (f l3))
-            in f (rec0 l2 prop l)
-        | DontKeep l2 -> rec0 l2 prop l)) aP
-
-let genPcPf a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ i aP q =
-  genPcPf0 a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec
-    prop i aP q
-
-let pbuchf a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ pq =
-  well_founded_induction prop (fun x ->
-    prod_rec (fun p q ->
-      match q with
-        Nil -> (fun h' -> p)
-      | Cons (a, q2) -> (fun rec0 ->
-          letP
-            (nf a0 a1 plusA invA minusA multA divA prop eqA_dec n
-              ltM_dec prop a p) (fun a2 _ ->
-            match match a2 with
-                    Nil -> Left
-                  | Cons (a3, l) -> Right with
-              Left -> rec0 (Pair (p, q2)) prop
-            | Right ->
-                rec0 (Pair
-                  ((let rec f = function
-                      Nil -> Cons (a2, Nil)
-                    | Cons (a3, l0) -> Cons (a3, (f l0))
-                    in f p),
-                  (genPcPf a0 a1 plusA invA minusA multA divA prop
-                    eqA_dec n ltM_dec prop a2 p q2))) prop))) x) pq
-
-let genOCPf a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ h' =
-  let rec f = function
-    Nil -> Nil
-  | Cons (a, l0) ->
-      genPcPf a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec
-        prop a l0 (f l0)
-  in f h'
-
-let buch a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ p =
-  pbuchf a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec prop
-    (Pair (p,
-    (genOCPf a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec
-      prop p)))
-
-let redbuch a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ l =
-  red a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec prop
-    (buch a0 a1 plusA invA minusA multA divA prop eqA_dec n ltM_dec
-      prop l)
-
-let plusp a0 plusA eqA_dec n ltM_dec l =
-  well_founded_induction prop (fun x ->
-    match x with
-      Pair (p, q) ->
-        (match p with
-           Nil -> (fun h' -> q)
-         | Cons (a1, m2) ->
-             (match q with
-                Nil -> (fun h' -> Cons (a1, m2))
-              | Cons (a2, m3) -> (fun h' ->
-                  match ltT_dec n ltM_dec a1 a2 with
-                    Inleft p0 ->
-                      (match p0 with
-                         Left -> Cons (a2,
-                           (h' (Pair ((Cons (a1, m2)), m3)) prop))
-                       | Right -> Cons (a1,
-                           (h' (Pair (m2, (Cons (a2, m3)))) prop)))
-                  | Inright ->
-                      letP
-                        (match a1 with
-                           Pair (b2, c2) ->
-                             (match a2 with
-                                Pair (b3, c3) -> Pair ((plusA b2 b3),
-                                  c2))) (fun letA _ ->
-                        match match letA with
-                                Pair (b, h'0) -> eqA_dec b a0 with
-                          Left -> h' (Pair (m2, m3)) prop
-                        | Right -> Cons (letA,
-                            (h' (Pair (m2, m3)) prop))))))) l
-
-let pluspf a0 plusA eqA_dec n ltM_dec l1 l2 =
-  projsig1 (plusp a0 plusA eqA_dec n ltM_dec (Pair (l1, l2)))
-
-let splus a0 plusA eqA_dec n ltM_dec _ sp1 sp2 =
-  pluspf a0 plusA eqA_dec n ltM_dec sp2 sp1
-
-let multpf a0 plusA multA eqA_dec n ltM_dec =
-  let rec multpf0 p q =
-    match p with
-      Nil -> Nil
-    | Cons (a, p') ->
-        pluspf a0 plusA eqA_dec n ltM_dec (mults multA n a q)
-          (multpf0 p' q)
-  in multpf0
-
-let smult a0 a1 plusA invA minusA multA divA _ eqA_dec n ltM_dec _ sp1 sp2 =
-  multpf a0 plusA multA eqA_dec n ltM_dec sp2 sp1
-
-let tmults a0 multA eqA_dec n a =
-  match match a with
-          Pair (b, h') -> eqA_dec b a0 with
-    Left -> (fun h' -> Nil)
-  | Right -> (fun p -> mults multA n a p)
-
-let sscal a0 a1 plusA invA minusA multA divA _ eqA_dec n _ a p =
-  tmults a0 multA eqA_dec n (Pair (a, (m1 n))) p
-
-let spO a0 n =
-  Nil
-
-let sp1 a0 a1 plusA invA minusA multA divA _ n =
-  Cons ((Pair (a1, (m1 n))), Nil)
-
-let gen_mon d =
-  let rec f = function
-    O -> (fun n0 -> N_0)
+let rec mult_mon n h' h'0 =
+  match n with
+  | O -> N_0
   | S n0 ->
-      let h' = f n0 in (fun n' ->
-      match n' with
-        O -> C_n (n0, (S O), (h' n0))
-      | S n'' -> C_n (n0, O, (h' n'')))
-  in f d
+    C_n (n0, (add (pmon1 (S n0) h') (pmon1 (S n0) h'0)),
+      (mult_mon n0 (pmon2 (S n0) h') (pmon2 (S n0) h'0)))
 
-let sgen a0 a1 plusA invA minusA multA divA _ n m =
-  Cons ((Pair (a1, (gen_mon n m))), Nil)
+(** val zero_mon : nat -> mon **)
 
-let mon_rec f0 f =
-  let rec f1 n = function
-    N_0 -> f0
-  | C_n (d, n0, m0) -> f d n0 m0 (f1 d m0)
-  in f1
+let rec zero_mon = function
+| O -> N_0
+| S n0 -> C_n (n0, O, (zero_mon n0))
 
-let lt_eq_lt_dec n =
-  let rec f = function
-    O -> (fun m ->
-      let rec f0 = function
-        O -> Inleft Right
-      | S n2 -> Inleft Left
-      in f0 m)
-  | S n1 -> (fun m ->
-      let rec f0 = function
-        O -> Inright
-      | S n3 ->
-          (match f n1 n3 with
-             Inleft a ->
-               (match a with
-                  Left -> Inleft Left
-                | Right -> Inleft Right)
-           | Inright -> Inright)
-      in f0 m)
-  in f n
+(** val div_mon : nat -> mon -> mon -> mon **)
 
-let orderc_dec n a =
-  mon_rec (fun b -> Inright) (fun d n0 m h' b ->
-    match h' (pmon2 (S d) b) with
-      Inleft h'0 ->
-        (match h'0 with
-           Left -> Inleft Left
-         | Right -> Inleft Right)
-    | Inright ->
-        (match lt_eq_lt_dec n0 (pmon1 (S d) b) with
-           Inleft a0 ->
-             (match a0 with
-                Left -> Inleft Right
-              | Right -> Inright)
-         | Inright -> Inleft Left)) n a
+let rec div_mon n h' h'0 =
+  match n with
+  | O -> N_0
+  | S n0 ->
+    C_n (n0, (sub (pmon1 (S n0) h') (pmon1 (S n0) h'0)),
+      (div_mon n0 (pmon2 (S n0) h') (pmon2 (S n0) h'0)))
 
-let degc n h' =
-  mon_rec O (fun d n1 m n2 -> plus n1 n2) n h'
+(** val div_mon_clean : nat -> mon -> mon -> (mon, bool) prod **)
+
+let rec div_mon_clean n h' h'0 =
+  match n with
+  | O -> Pair (N_0, True)
+  | S n0 ->
+    (match le_lt_dec (pmon1 (S n0) h'0) (pmon1 (S n0) h') with
+     | Left ->
+       let Pair (m, b) = div_mon_clean n0 (pmon2 (S n0) h') (pmon2 (S n0) h'0)
+       in
+       Pair ((C_n (n0, (sub (pmon1 (S n0) h') (pmon1 (S n0) h'0)), m)), b)
+     | Right -> Pair (h', False))
+
+(** val eqmon_dec : nat -> mon -> mon -> sumbool **)
+
+let rec eqmon_dec n x y =
+  match n with
+  | O -> Left
+  | S n0 ->
+    (match Nat.eq_dec (pmon1 (S n0) x) (pmon1 (S n0) y) with
+     | Left -> eqmon_dec n0 (pmon2 (S n0) x) (pmon2 (S n0) y)
+     | Right -> Right)
+
+(** val ppcm_mon : nat -> mon -> mon -> mon **)
+
+let rec ppcm_mon n m2 m3 =
+  match n with
+  | O -> N_0
+  | S n0 ->
+    C_n (n0, (Nat.max (pmon1 (S n0) m2) (pmon1 (S n0) m3)),
+      (ppcm_mon n0 (pmon2 (S n0) m2) (pmon2 (S n0) m3)))
+
+(** val letP : 'a1 -> ('a1 -> __ -> 'a2) -> 'a2 **)
+
+let letP h h' =
+  h' h __
+
+(** val orderc_dec : nat -> mon -> mon -> sumbool sumor **)
+
+let rec orderc_dec _ m b =
+  match m with
+  | N_0 -> Inright
+  | C_n (d, n, m0) ->
+    (match orderc_dec d m0 (pmon2 (S d) b) with
+     | Inleft s -> Inleft s
+     | Inright ->
+       (match lt_eq_lt_dec n (pmon1 (S d) b) with
+        | Inleft a -> (match a with
+                       | Left -> Inleft Right
+                       | Right -> Inright)
+        | Inright -> Inleft Left))
+
+(** val degc : nat -> mon -> nat **)
+
+let rec degc _ = function
+| N_0 -> O
+| C_n (d, n, m0) -> add n (degc d m0)
+
+(** val total_orderc_dec : nat -> mon -> mon -> sumbool sumor **)
 
 let total_orderc_dec n a b =
   letP (degc n a) (fun u _ ->
     letP (degc n b) (fun u0 _ ->
       match le_lt_dec u u0 with
-        Left ->
-          (match match lt_eq_lt_dec u u0 with
-                   Inleft a0 -> a0
-                 | Inright -> false_rec prop with
-             Left -> Inleft Left
-           | Right ->
-               (match orderc_dec n a b with
-                  Inleft h'3 ->
-                    (match h'3 with
-                       Left -> Inleft Left
-                     | Right -> Inleft Right)
-                | Inright -> Inright))
+      | Left ->
+        (match le_lt_eq_dec u u0 with
+         | Left -> Inleft Left
+         | Right -> orderc_dec n a b)
       | Right -> Inleft Right))
 
+(** val m1 : nat -> mon **)
+
+let m1 =
+  zero_mon
+
+type 'a term = ('a, mon) prod
+
+(** val t2M : nat -> 'a1 term -> mon **)
+
+let t2M _ = function
+| Pair (_, m) -> m
+
+(** val zeroP_dec :
+    'a1 -> ('a1 -> 'a1 -> sumbool) -> nat -> 'a1 term -> sumbool **)
+
+let zeroP_dec a0 eqA_dec _ = function
+| Pair (a, _) -> eqA_dec a a0
+
+(** val plusTerm :
+    ('a1 -> 'a1 -> 'a1) -> nat -> 'a1 term -> 'a1 term -> 'a1 term **)
+
+let plusTerm plusA _ x y =
+  let Pair (a, m) = x in let Pair (a0, _) = y in Pair ((plusA a a0), m)
+
+(** val multTerm :
+    ('a1 -> 'a1 -> 'a1) -> nat -> 'a1 term -> 'a1 term -> 'a1 term **)
+
+let multTerm multA n h' h1' =
+  let Pair (a, m) = h' in
+  let Pair (a0, m0) = h1' in Pair ((multA a a0), (mult_mon n m m0))
+
+(** val invTerm : ('a1 -> 'a1) -> nat -> 'a1 term -> 'a1 term **)
+
+let invTerm invA _ = function
+| Pair (a, m) -> Pair ((invA a), m)
+
+(** val t1 : 'a1 -> nat -> 'a1 term **)
+
+let t1 a1 n =
+  Pair (a1, (m1 n))
+
+(** val minusTerm :
+    ('a1 -> 'a1 -> 'a1) -> nat -> 'a1 term -> 'a1 term -> 'a1 term **)
+
+let minusTerm minusA _ h h' =
+  let Pair (a, m) = h in let Pair (a0, _) = h' in Pair ((minusA a a0), m)
+
+(** val eqT_dec : nat -> 'a1 term -> 'a1 term -> sumbool **)
+
+let eqT_dec n x y =
+  eqmon_dec n (t2M n x) (t2M n y)
+
+(** val ltT_dec :
+    nat -> (mon -> mon -> sumbool sumor) -> 'a1 term -> 'a1 term -> sumbool
+    sumor **)
+
+let ltT_dec n ltM_dec x y =
+  ltM_dec (t2M n x) (t2M n y)
+
+(** val pX : nat -> 'a1 term -> 'a1 term list -> 'a1 term list **)
+
+let pX _ x x0 =
+  Cons (x, x0)
+
+(** val pO : nat -> 'a1 term list **)
+
+let pO _ =
+  Nil
+
+type 'a poly = 'a term list
+
+(** val projsig1 : 'a1 -> 'a1 **)
+
+let projsig1 h =
+  h
+
+(** val plusp :
+    'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> sumbool) -> nat -> (mon ->
+    mon -> sumbool sumor) -> ('a1 term list, 'a1 term list) prod -> 'a1 term
+    list **)
+
+let rec plusp a0 plusA eqA_dec n ltM_dec = function
+| Pair (l0, l1) ->
+  (match l0 with
+   | Nil -> l1
+   | Cons (t, l2) ->
+     (match l1 with
+      | Nil -> pX n t l2
+      | Cons (t0, l3) ->
+        (match ltT_dec n ltM_dec t t0 with
+         | Inleft s ->
+           (match s with
+            | Left ->
+              let rec0 =
+                plusp a0 plusA eqA_dec n ltM_dec (Pair ((pX n t l2), l3))
+              in
+              pX n t0 rec0
+            | Right ->
+              let rec0 =
+                plusp a0 plusA eqA_dec n ltM_dec (Pair (l2, (pX n t0 l3)))
+              in
+              pX n t rec0)
+         | Inright ->
+           letP (plusTerm plusA n t t0) (fun letA _ ->
+             match zeroP_dec a0 eqA_dec n letA with
+             | Left -> plusp a0 plusA eqA_dec n ltM_dec (Pair (l2, l3))
+             | Right ->
+               let rec0 = plusp a0 plusA eqA_dec n ltM_dec (Pair (l2, l3)) in
+               pX n letA rec0))))
+
+(** val pluspf :
+    'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> sumbool) -> nat -> (mon ->
+    mon -> sumbool sumor) -> 'a1 term list -> 'a1 term list -> 'a1 term list **)
+
+let pluspf a0 plusA eqA_dec n ltM_dec l1 l2 =
+  projsig1 (plusp a0 plusA eqA_dec n ltM_dec (Pair (l1, l2)))
+
+(** val splus :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly -> 'a1 poly
+    -> 'a1 poly **)
+
+let splus a0 _ plusA _ _ _ _ eqA_dec n ltM_dec sp2 sp3 =
+  pluspf a0 plusA eqA_dec n ltM_dec sp3 sp2
+
+(** val mults :
+    ('a1 -> 'a1 -> 'a1) -> nat -> 'a1 term -> 'a1 term list -> 'a1 term list **)
+
+let rec mults multA n a = function
+| Nil -> pO n
+| Cons (y, l) -> pX n (multTerm multA n a y) (mults multA n a l)
+
+(** val tmults :
+    'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> sumbool) -> nat -> 'a1 term
+    -> 'a1 term list -> 'a1 term list **)
+
+let tmults a0 multA eqA_dec n a h' =
+  match zeroP_dec a0 eqA_dec n a with
+  | Left -> pO n
+  | Right -> mults multA n a h'
+
+(** val minuspp :
+    'a1 -> 'a1 -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> sumbool) -> nat -> (mon -> mon -> sumbool sumor) ->
+    ('a1 term list, 'a1 term list) prod -> 'a1 term list **)
+
+let rec minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec = function
+| Pair (l0, l1) ->
+  (match l0 with
+   | Nil -> mults multA n (invTerm invA n (t1 a1 n)) l1
+   | Cons (t, l2) ->
+     (match l1 with
+      | Nil -> pX n t l2
+      | Cons (t0, l3) ->
+        (match ltT_dec n ltM_dec t t0 with
+         | Inleft s ->
+           (match s with
+            | Left ->
+              let rec0 =
+                minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec (Pair
+                  ((pX n t l2), l3))
+              in
+              pX n (invTerm invA n t0) rec0
+            | Right ->
+              let rec0 =
+                minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec (Pair (l2,
+                  (pX n t0 l3)))
+              in
+              pX n t rec0)
+         | Inright ->
+           let rec0 =
+             minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec (Pair (l2, l3))
+           in
+           letP (minusTerm minusA n t t0) (fun u _ ->
+             match zeroP_dec a0 eqA_dec n u with
+             | Left -> rec0
+             | Right -> pX n u rec0))))
+
+(** val minuspf :
+    'a1 -> 'a1 -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1
+    term list -> 'a1 term list -> 'a1 term list **)
+
+let minuspf a0 a1 invA minusA multA eqA_dec n ltM_dec l1 l2 =
+  projsig1 (minuspp a0 a1 invA minusA multA eqA_dec n ltM_dec (Pair (l1, l2)))
+
+(** val divTerm :
+    'a1 -> ('a1 -> 'a1 -> __ -> 'a1) -> nat -> 'a1 term -> 'a1 term -> 'a1
+    term **)
+
+let divTerm _ divA n h b =
+  let Pair (a, m) = h in
+  let Pair (a0, m0) = b in Pair ((divA a a0 __), (div_mon n m m0))
+
+(** val mk_clean : nat -> mon -> mon -> (mon, bool) prod **)
+
+let mk_clean =
+  div_mon_clean
+
+(** val divTerm_dec :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> nat -> 'a1 term ->
+    'a1 term -> sumbool **)
+
+let divTerm_dec _ _ _ _ _ _ _ n a b =
+  let Pair (_, m) = a in
+  let Pair (_, m0) = b in
+  let Pair (_, b0) = mk_clean n m m0 in
+  (match b0 with
+   | True -> Left
+   | False -> Right)
+
+(** val ppc : 'a1 -> nat -> 'a1 term -> 'a1 term -> 'a1 term **)
+
+let ppc a1 n h h' =
+  let Pair (_, m) = h in let Pair (_, m0) = h' in Pair (a1, (ppcm_mon n m m0))
+
+(** val divP_dec :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> nat -> 'a1 term ->
+    'a1 term -> sumbool **)
+
+let divP_dec =
+  divTerm_dec
+
+(** val spminusf :
+    'a1 -> 'a1 -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 -> sumbool) -> nat -> (mon ->
+    mon -> sumbool sumor) -> 'a1 term -> 'a1 term -> 'a1 term list -> 'a1
+    term list -> 'a1 term list **)
+
+let spminusf a0 a1 invA minusA multA divA eqA_dec n ltM_dec a b p q =
+  minuspf a0 a1 invA minusA multA eqA_dec n ltM_dec p
+    (mults multA n (divTerm a0 divA n a b) q)
+
+(** val mks : 'a1 -> nat -> 'a1 term list -> 'a1 poly **)
+
+let mks _ _ p =
+  p
+
+(** val selectdivf :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> 'a1 term -> 'a1 poly list -> 'a1 term list sumor **)
+
+let rec selectdivf a0 a1 plusA invA minusA multA divA eqA_dec n a = function
+| Nil -> Inright
+| Cons (y, l) ->
+  let h' = selectdivf a0 a1 plusA invA minusA multA divA eqA_dec n a l in
+  (match y with
+   | Nil -> h'
+   | Cons (t, l0) ->
+     (match divP_dec a0 a1 plusA invA minusA multA divA n a t with
+      | Left -> Inleft (pX n t l0)
+      | Right -> h'))
+
+(** val reducef :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly list -> 'a1
+    poly -> 'a1 poly **)
+
+let rec reducef a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec q = function
+| Nil -> mks a0 n (pO n)
+| Cons (t, l) ->
+  let h'1 = selectdivf a0 a1 plusA invA minusA multA divA eqA_dec n t in
+  (match h'1 q with
+   | Inleft s ->
+     (match s with
+      | Nil -> assert false (* absurd case *)
+      | Cons (t0, l0) ->
+        reducef a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec q
+          (mks a0 n
+            (spminusf a0 a1 invA minusA multA divA eqA_dec n ltM_dec t t0 l
+              l0)))
+   | Inright ->
+     let h'3 =
+       reducef a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec q
+         (mks a0 n l)
+     in
+     mks a0 n (pX n t h'3))
+
+(** val spolyf :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 term list -> 'a1
+    term list -> 'a1 term list **)
+
+let spolyf a0 a1 _ invA minusA multA divA eqA_dec n ltM_dec p q =
+  match p with
+  | Nil -> pO n
+  | Cons (t, l) ->
+    (match q with
+     | Nil -> pO n
+     | Cons (t0, l0) ->
+       letP (ppc a1 n t t0) (fun u _ ->
+         minuspf a0 a1 invA minusA multA eqA_dec n ltM_dec
+           (mults multA n (divTerm a0 divA n u t) l)
+           (mults multA n (divTerm a0 divA n u t0) l0)))
+
+(** val multpf :
+    'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 term list -> 'a1
+    term list -> 'a1 term list **)
+
+let rec multpf a0 plusA multA eqA_dec n ltM_dec p q =
+  match p with
+  | Nil -> pO n
+  | Cons (a, p') ->
+    pluspf a0 plusA eqA_dec n ltM_dec (mults multA n a q)
+      (multpf a0 plusA multA eqA_dec n ltM_dec p' q)
+
+(** val smult :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly -> 'a1 poly
+    -> 'a1 poly **)
+
+let smult a0 _ plusA _ _ multA _ eqA_dec n ltM_dec sp2 sp3 =
+  multpf a0 plusA multA eqA_dec n ltM_dec sp3 sp2
+
+(** val addEnd : 'a1 -> nat -> 'a1 poly -> 'a1 poly list -> 'a1 poly list **)
+
+let rec addEnd a0 n a = function
+| Nil -> Cons (a, Nil)
+| Cons (y, l) -> Cons (y, (addEnd a0 n a l))
+
+(** val spolyp :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly -> 'a1 poly
+    -> 'a1 poly **)
+
+let spolyp a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec p q =
+  spolyf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec q p
+
+(** val spO : 'a1 -> nat -> 'a1 poly **)
+
+let spO _ =
+  pO
+
+(** val sp1 :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> nat -> 'a1 poly **)
+
+let sp1 _ a1 _ _ _ _ _ n =
+  pX n (Pair (a1, (m1 n))) Nil
+
+(** val sgen :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> nat -> nat -> 'a1
+    poly **)
+
+let sgen _ a1 _ _ _ _ _ n m =
+  pX n (Pair (a1, (gen_mon n m))) (pO n)
+
+(** val sscal :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 -> 'a1 poly ->
+    'a1 poly **)
+
+let sscal a0 _ _ _ _ multA _ eqA_dec n _ a p =
+  tmults a0 multA eqA_dec n (Pair (a, (m1 n))) p
+
+(** val zerop_dec : 'a1 -> nat -> 'a1 poly -> sumbool **)
+
+let zerop_dec _ _ = function
+| Nil -> Left
+| Cons (_, _) -> Right
+
+(** val divp_dec :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> 'a1 poly -> 'a1 poly -> sumbool **)
+
+let divp_dec a0 a1 plusA invA minusA multA divA _ n a = function
+| Nil -> Right
+| Cons (t, _) ->
+  (match a with
+   | Nil -> Right
+   | Cons (t0, _) -> divP_dec a0 a1 plusA invA minusA multA divA n t0 t)
+
+(** val ppcp :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> 'a1 poly -> 'a1 poly -> 'a1 poly **)
+
+let ppcp _ a1 _ _ _ _ _ _ n h' h'1 =
+  match h' with
+  | Nil -> pO n
+  | Cons (t, _) ->
+    (match h'1 with
+     | Nil -> pO n
+     | Cons (t0, _) -> Cons ((ppc a1 n t t0), (pO n)))
+
+(** val unit0 :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> 'a1 poly -> 'a1 term **)
+
+let unit0 _ a1 _ _ _ _ divA _ n = function
+| Nil -> t1 a1 n
+| Cons (t, _) -> let Pair (a, _) = t in Pair ((divA a1 a __), (m1 n))
+
+(** val nf :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly -> 'a1 poly
+    list -> 'a1 poly **)
+
+let nf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec p l =
+  letP (reducef a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l p)
+    (fun u _ ->
+    mults multA n
+      (unit0 a0 a1 plusA invA minusA multA divA eqA_dec n (mks a0 n u)) u)
+
+(** val foreigner_dec :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> nat -> 'a1 poly -> 'a1 poly ->
+    sumbool **)
+
+let foreigner_dec _ a1 multA n a = function
+| Nil -> Left
+| Cons (t, _) ->
+  (match a with
+   | Nil -> Left
+   | Cons (t0, _) -> eqT_dec n (ppc a1 n t t0) (multTerm multA n t t0))
+
+type 'a cpRes =
+| Keep of 'a poly list
+| DontKeep of 'a poly list
+
+(** val addRes : 'a1 -> nat -> 'a1 poly -> 'a1 cpRes -> 'a1 cpRes **)
+
+let addRes _ _ i = function
+| Keep p -> Keep (Cons (i, p))
+| DontKeep p -> DontKeep (Cons (i, p))
+
+(** val slice :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> 'a1 poly -> 'a1 poly -> 'a1 poly list -> 'a1 cpRes **)
+
+let rec slice a0 a1 plusA invA minusA multA divA eqA_dec n i a = function
+| Nil ->
+  (match foreigner_dec a0 a1 multA n i a with
+   | Left -> DontKeep Nil
+   | Right -> Keep Nil)
+| Cons (y, l) ->
+  (match divp_dec a0 a1 plusA invA minusA multA divA eqA_dec n
+           (ppcp a0 a1 plusA invA minusA multA divA eqA_dec n i a) y with
+   | Left -> DontKeep (Cons (y, l))
+   | Right ->
+     (match divp_dec a0 a1 plusA invA minusA multA divA eqA_dec n
+              (ppcp a0 a1 plusA invA minusA multA divA eqA_dec n i y) a with
+      | Left -> slice a0 a1 plusA invA minusA multA divA eqA_dec n i a l
+      | Right ->
+        addRes a0 n y
+          (slice a0 a1 plusA invA minusA multA divA eqA_dec n i a l)))
+
+(** val genPcPf0 :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly -> 'a1 poly
+    list -> 'a1 poly list -> 'a1 poly list **)
+
+let rec genPcPf0 a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec i aP r =
+  match aP with
+  | Nil -> r
+  | Cons (p, l) ->
+    (match slice a0 a1 plusA invA minusA multA divA eqA_dec n i p l with
+     | Keep p0 ->
+       let h'1 =
+         genPcPf0 a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec i p0
+       in
+       addEnd a0 n
+         (spolyp a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec i p)
+         (h'1 r)
+     | DontKeep p0 ->
+       genPcPf0 a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec i p0 r)
+
+(** val genPcPf :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly -> 'a1 poly
+    list -> 'a1 poly list -> 'a1 poly list **)
+
+let genPcPf =
+  genPcPf0
+
+(** val genOCPf :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly list -> 'a1
+    poly list **)
+
+let rec genOCPf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec = function
+| Nil -> Nil
+| Cons (y, l) ->
+  genPcPf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec y l
+    (genOCPf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l)
+
+(** val pbuchf :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> ('a1 poly list, 'a1
+    poly list) prod -> 'a1 poly list **)
+
+let rec pbuchf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec = function
+| Pair (a, b) ->
+  (match b with
+   | Nil -> a
+   | Cons (p, l) ->
+     letP (nf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec p a)
+       (fun a2 _ ->
+       match zerop_dec a0 n a2 with
+       | Left ->
+         pbuchf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec (Pair
+           (a, l))
+       | Right ->
+         pbuchf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec (Pair
+           ((addEnd a0 n a2 a),
+           (genPcPf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec a2 a
+             l)))))
+
+(** val strip : 'a1 -> nat -> 'a1 poly list -> 'a1 poly list **)
+
+let strip _ _ h' =
+  h'
+
+(** val buch :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly list -> 'a1
+    poly list **)
+
+let buch a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec p =
+  strip a0 n
+    (pbuchf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec (Pair (p,
+      (genOCPf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec p))))
+
+(** val redacc :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly list -> 'a1
+    poly list -> 'a1 poly list **)
+
+let rec redacc a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec h' l =
+  match h' with
+  | Nil -> Nil
+  | Cons (y, l0) ->
+    letP
+      (nf a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec y (app l0 l))
+      (fun u _ ->
+      match zerop_dec a0 n u with
+      | Left ->
+        redacc a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l0 l
+      | Right ->
+        Cons (u,
+          (redacc a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l0
+            (Cons (u, l)))))
+
+(** val red :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly list -> 'a1
+    poly list **)
+
+let red a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l =
+  redacc a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l Nil
+
+(** val redbuch :
+    'a1 -> 'a1 -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1) -> ('a1 -> 'a1 -> 'a1)
+    -> ('a1 -> 'a1 -> 'a1) -> ('a1 -> 'a1 -> __ -> 'a1) -> ('a1 -> 'a1 ->
+    sumbool) -> nat -> (mon -> mon -> sumbool sumor) -> 'a1 poly list -> 'a1
+    poly list **)
+
+let redbuch a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l =
+  red a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec
+    (buch a0 a1 plusA invA minusA multA divA eqA_dec n ltM_dec l);;
 
 (***********************************************************************)
-(* To run the code on examples you first need a top level that includes
-   the bignum. To create that under unix do 
-     ocamlmktop -custom -o ocaml_num nums.cma -cclib -lnums
-   then start ocaml_num and enter the following ML code 
- *)
+(* Here is a small example file that uses the zarith library           *)
+(* to compute some basis                                               *)
+(***********************************************************************)
 
-open Ratio;;
-open Big_int;;
+#use "topfind";;
+#require "zarith.top";;
 
+let var_list = ["a"; "b"; "c"; "d"; "e"; "f"];;
 
-type r6 =  (ratio, mon) prod list;;
+let rec int_of_nat = function 
+| O -> 0 
+| S m -> (1 + int_of_nat m);;
+
+let string_of_nat n = string_of_int (int_of_nat n);;
+
+let rec string_of_mon_rec l = function
+| N_0 -> ""
+| C_n (_, O, v) -> string_of_mon_rec (List.tl l) v
+| C_n (_, S O, v) -> List.hd l ^ string_of_mon_rec (List.tl l) v
+| C_n (_, k, v) -> List.hd l ^ "^" ^ string_of_nat k ^ string_of_mon_rec (List.tl l) v
+;;
+
+let rec is_null_mon = function
+| N_0 -> true
+| C_n (_, O, v) -> is_null_mon v
+| C_n (_, k, v) -> false
+;;
+
+let string_of_mon m = string_of_mon_rec var_list m;;
+
+type r6 =  (Q.t, mon) prod list;;
+
+let string_of_qpair r m = if Q.equal r Q.one && (not (is_null_mon m)) then 
+  string_of_mon m else Q.to_string r ^ " " ^ string_of_mon m
+
+let rec string_of_r6 = function
+| Nil -> ""
+| Cons (Pair (r, m), Nil) -> string_of_qpair r m 
+| Cons (Pair (r, m), p) -> 
+     string_of_qpair r m ^ " + " ^ string_of_r6 p
+;;
 
 let rec n_to_p n  =  if n = 0 then O else (S (n_to_p (n-1)));;
 
-let eqd n m = if (eq_ratio n m) then  Left else Right;;
+let eqd n m = if (Q.equal n m) then  Left else Right;;
 
-let ri = ratio_of_int;;
+let ri = Q.of_int;;
 
 let plusP: int -> r6 -> r6 -> r6 =  
-  fun n -> 
-   let n = n_to_p n in 
-   (splus (ri 0) (add_ratio) eqd n (total_orderc_dec n) n);;
-
-
+    fun n -> 
+     let n = n_to_p n in 
+     (splus (ri 0) (ri 1) (Q.add) (Q.sub) (Q.neg) (Q.mul)
+         (Q.div) eqd n (total_orderc_dec n));;
 
 let multP: int -> r6 -> r6 -> r6  = 
   fun n -> 
    let n = n_to_p n in 
-  (smult (ri 0)(ri 1) (add_ratio) (minus_ratio) (sub_ratio) (mult_ratio)
-         (div_ratio) n eqd n (total_orderc_dec n) n);;
-
+  (smult (ri 0) (ri 1) (Q.add) (Q.sub) (Q.neg) (Q.mul)
+         (Q.div) eqd n (total_orderc_dec n));;
 
 let scalP: int -> int -> r6 -> r6  = 
   fun n -> 
    let n = n_to_p n in 
       fun m -> 
-      (sscal (ri 0) (ri 1) (add_ratio) (minus_ratio) (sub_ratio) (mult_ratio)
-         (div_ratio) n eqd n n (ri m));;
+      (sscal (ri 0) (ri 1) (Q.add) (Q.sub) (Q.neg) (Q.mul)
+         (Q.div) eqd n (total_orderc_dec n) (ri m));;
 
-let spO a0 n =
-  Nil
-
+let spO a0 n =  Nil;;
 
 let p0 : int -> r6 = fun n -> (spO  (ri 0) (n_to_p n));;
 
-let p1 : int -> r6 = (fun n -> (sp1 (ri 0) (ri 1) (add_ratio) (minus_ratio) (sub_ratio) (mult_ratio)
-         (div_ratio) n (n_to_p n) )) ;;
+let p1 : int -> r6 = (fun n -> (sp1 (ri 0) (ri 1) (Q.add) (Q.sub) (Q.neg) (Q.mul)
+         (Q.div) (n_to_p n) )) ;;
 
+let mon : int -> int -> r6 = fun n -> fun m -> sgen (ri 0) (ri 1) (Q.add) (Q.sub) (Q.neg) (Q.mul)
+         (Q.div) (n_to_p n)  (n_to_p m);;
 
-let mon : int -> int -> r6 = fun n -> fun m -> sgen (ri 0) (ri 1) (add_ratio) (minus_ratio) (sub_ratio) (mult_ratio)
-         (div_ratio) n (n_to_p n)  (n_to_p m);;
-
-let div1_ratio a b c = div_ratio a b;;
-
-
+let div1 a b c = Q.div a b;;
+ 
 let tbuch : int -> r6 list -> r6 list =
     (fun n ->
       let n = n_to_p n in 
-      redbuch (ri 0) (ri 1) (add_ratio) (minus_ratio) (sub_ratio) (mult_ratio)
-         (div1_ratio) n eqd  n  (total_orderc_dec n) n);;
+      redbuch (ri 0) (ri 1) (Q.add) (Q.neg) (Q.sub) (Q.mul)
+         (div1) eqd  n  (total_orderc_dec n));;
 
 let rec l2l l = match l with [] -> Nil | (a::tl) -> Cons (a, l2l tl);;
 let rec l5l l = match l with Nil -> [] | Cons (a,tl) -> a :: (l5l tl);;
@@ -687,11 +912,16 @@ let r0 = (plus a (plus b c));;
 let r1 = (plus (mult a b) (plus (mult b c) (mult c a)));;
 let r2 = (plus (mult a (mult b c)) (scal (-1) p1));;
 
+let print_lpol l = 
+  List.map (fun n -> print_string (string_of_r6 n); print_newline()) l; ();;
 
-tbuch [r2;r1;r0];;
-
-print_string "3"; print_newline();;
-
+let _ =
+(print_string "3"; print_newline();
+ print_string "init"; print_newline();
+ print_lpol [r2;r1;r0];
+ print_string "result"; print_newline();
+ print_lpol (tbuch [r2;r1;r0]))
+;;
 
 let d = gen 3;;
 
@@ -701,12 +931,13 @@ let r2 = (plus (mult a (mult b c)) (plus (mult b (mult c d)) (plus (mult c (mult
              (mult d (mult a b)))));;
 let r3 = (plus (mult a (mult b (mult c d))) (scal (-1) p1));;
 
-
-
-
-tbuch [r3;r2;r1;r0];;
-
-print_string "4"; print_newline();;
+let _ =
+ print_string "4"; print_newline();
+ print_string "init"; print_newline();
+ print_lpol [r3;r2;r1;r0]; print_newline();
+ print_string "result"; print_newline();
+ print_lpol (tbuch [r3;r2;r1;r0])
+;;
 
 let e = gen 4;;
 
@@ -721,11 +952,13 @@ let r3= (plus (mult a (mult b (mult c d))) (plus (mult b (mult c (mult d e)))
              (mult e(mult a (mult b c)))))));;
 let r4 = (plus (mult a (mult b (mult c (mult d e)))) (scal (-1) p1));;
 
-
-
-tbuch [r4;r3;r2;r1;r0];;
-
-print_string "5"; print_newline();;
+let _ = 
+  print_string "5"; print_newline();
+  print_string "init"; print_newline();
+  print_lpol [r4;r3;r2;r1;r0];
+  print_string "result"; print_newline();
+  print_lpol (tbuch [r4; r3;r2;r1;r0])
+;;
 
 let f = gen 5;;
 
@@ -747,7 +980,10 @@ let r4= (plus (mult a (mult b (mult c (mult d e)))) (plus (mult b (mult c (mult 
              (mult f(mult a (mult b (mult c d)))))))));;
 let r5 = (plus (mult a (mult b (mult c (mult d (mult e f))))) (scal (-1) p1));;
 
-tbuch [r5;r4;r3;r2;r1;r0];;
-
-
-print_string "6"; print_newline();;
+let () =
+ print_string "6"; print_newline();
+ print_string "init"; print_newline();
+ print_lpol [r5;r4;r3;r2;r1;r0];
+ print_string "result"; print_newline();
+ print_lpol (tbuch [r5;r4; r3;r2;r1;r0]);
+;;

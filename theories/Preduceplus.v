@@ -87,7 +87,7 @@ elim H'2;
  [ intros H'5; try exact H'5; clear H'2 | intros H'5; clear H'2 | clear H'2 ].
 apply ltP_trans with (y := y); auto.
 apply ltP_reduce with (1 := cs) (3 := H'0); auto.
-apply (ltp_eqp_comp A A0 eqA) with (p := y) (q := x); auto.
+apply ltp_eqp_comp with (p := y) (q := x); auto.
 apply ltP_reduce with (1 := cs) (3 := H'0); auto.
 apply canonical_reduce with (1 := cs) (3 := H'0); auto.
 apply canonical_reduce with (1 := cs) (3 := H'0); auto.
@@ -259,14 +259,14 @@ apply canonical_reduceplus with (Q := Q) (p := pX a p0); auto.
 elim (order_reduceplus Q (pX a p0) p2);
  [ intros H'5 | intros H'5 | idtac | idtac ]; auto.
 apply ltP_trans with (y := pX a p0); auto.
-apply (ltp_eqp_comp A A0 eqA) with (p := pX a p0) (q := pX b (pO A n)); auto.
+apply ltp_eqp_comp with (p := pX a p0) (q := pX b (pO A n)); auto.
 apply ltP_pX_canonical; auto.
 apply canonical_reduceplus with (Q := Q) (p := q0); auto.
 elim (order_reduceplus Q q0 q2); [ intros H'5 | intros H'5 | idtac | idtac ];
  auto.
 apply ltP_trans with (y := q0); auto.
 apply (canonical_pX_ltP A A0 eqA); auto.
-apply (ltp_eqp_comp A A0 eqA) with (p := q0) (q := pX b (pO A n)); auto.
+apply ltp_eqp_comp with (p := q0) (q := pX b (pO A n)); auto.
 apply (canonical_pX_ltP A A0 eqA); auto.
 apply reduce_eqp_com with (1 := cs) (p := p1) (q := q1); auto.
 apply canonical_imp_canonical with (a := a0); auto.
@@ -332,14 +332,14 @@ elim (order_reduceplus Q p0 p2);
  [ intros H'14 | intros H'14 | idtac | idtac ]; auto.
 apply ltP_trans with (y := p0); auto.
 apply (canonical_pX_ltP A A0 eqA); auto.
-apply (ltp_eqp_comp A A0 eqA) with (p := p0) (q := pX a (pO A n)); auto.
+apply ltp_eqp_comp with (p := p0) (q := pX a (pO A n)); auto.
 apply (canonical_pX_ltP A A0 eqA); auto.
 apply ltP_pX_canonical; auto.
 apply canonical_reduceplus with (Q := Q) (p := pX b q0); auto.
 elim (order_reduceplus Q (pX b q0) q2);
  [ intros H'14 | intros H'14 | idtac | idtac ]; auto.
 apply ltP_trans with (y := pX b q0); auto.
-apply (ltp_eqp_comp A A0 eqA) with (p := pX b q0) (q := pX a (pO A n)); auto.
+apply ltp_eqp_comp with (p := pX b q0) (q := pX a (pO A n)); auto.
 cut (canonical A0 eqA ltM p0);
  [ intros C0 | apply canonical_imp_canonical with (a := a); auto ].
 cut (canonical A0 eqA ltM q0);
@@ -551,7 +551,7 @@ apply reduce_mults_invf with (1 := cs); auto.
 apply reduce_eqp_com with (1 := cs) (p := x) (q := y); auto.
 apply H'4; auto.
 apply canonical_reduce with (1 := cs) (3 := H'2); auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_mults; auto.
 apply canonical_reduce with (1 := cs) (3 := H'2); auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
@@ -574,8 +574,8 @@ apply
             (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n) a (b:=a) H') y);
  auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply mults_comp with (1 := cs); auto.
-apply divTerm_multTerm_l with (1 := cs); auto.
+apply mults_comp; auto.
+apply divTerm_multTerm_l; auto.
 apply divTerm_on_eqT with (1 := cs); auto.
 apply (eqT_sym A n); auto.
 Qed.
@@ -755,7 +755,7 @@ apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n);
    with
      (y := pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM)
              ltM_dec q (pO A n)); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply minuspf_refl with (1 := cs); auto.
 apply eqp_imp_canonical with (1 := cs) (p := x); auto.
 intros x y z H'0 H'1 H'2 H'3 p q H'4 H'5 H'6 H'7.
@@ -1104,9 +1104,9 @@ apply
             (spminusf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM
                ltM_dec a b nZb p q) r0)
     (q := s); auto.
-apply canonical_pluspf with (1 := os); auto.
+apply canonical_pluspf; auto.
 apply canonical_spminusf_full with (1 := cs); auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply canonical_spminusf_full with (1 := cs); auto.
 apply
  eqp_imp_canonical
@@ -1159,7 +1159,7 @@ change
 rewrite <- pluspf_inv2_eqa with (1 := os); auto.
 apply reduceplus_skip; auto.
 rewrite pluspf_inv2_eqa with (1 := os); auto.
-apply canonical_pluspf with (1 := os); auto.
+apply canonical_pluspf; auto.
 apply eqp_imp_canonical with (1 := cs) (p := pX a q); auto.
 apply eqp_imp_canonical with (1 := cs) (p := pX c (pX a q)); auto.
 apply eqp_imp_canonical with (1 := cs) (p := pX c (pX a q)); auto.
@@ -1207,7 +1207,7 @@ apply
             (pX a q) (pX c r))
     (q := s); auto.
 rewrite <- pluspf_inv3a_eq; auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply eqp_imp_canonical with (1 := cs) (p := pX a q); auto.
 elim (H'1 r);
  [ intros s E; elim E; intros H'9 H'10; clear E | idtac | idtac ]; 
@@ -1231,7 +1231,7 @@ apply
 rewrite <- pluspf_inv3b_eq; auto.
 apply reduceplus_skip; auto.
 rewrite pluspf_inv3b_eq; auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply eqp_imp_canonical with (1 := cs) (p := pX a q); auto.
 apply
  canonical_reduce

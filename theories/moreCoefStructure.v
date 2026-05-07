@@ -102,7 +102,7 @@ apply
   with (y := plusA (multA (invA a) b) (plusA (multA a b) (invA (multA a b))));
  auto.
 apply eqA_trans with (y := plusA (multA (invA a) b) A0); auto.
-apply plusA_eqA_comp with (1 := cs); auto.
+apply plusA_eqA_comp; auto.
 apply multA_dist_r.
 Qed.
 Local Hint Resolve multA_invA_com_l : core.
@@ -132,7 +132,7 @@ apply
  eqA_trans
   with (y := plusA (invA a) (plusA (multA A1 a) (multA (invA A1) a))); 
  auto.
-apply plusA_eqA_comp with (1 := cs); auto.
+apply plusA_eqA_comp; auto.
 apply eqA_sym; auto.
 apply multA_dist_r.
 apply eqA_trans with (y := plusA (invA a) (plusA a (multA (invA A1) a)));
@@ -147,7 +147,7 @@ Qed.
  
 Theorem divA_A0_l : forall (a : A) (nZa : ~ eqA a A0), eqA (divA A0 a nZa) A0.
 intros a nZa; apply eqA_trans with (y := divA (multA A0 a) a nZa).
-apply divA_eqA_comp with (1 := cs); auto.
+apply divA_eqA_comp; auto.
 apply eqA_trans with (y := multA A0 (divA a a nZa)); auto.
 Qed.
 Local Hint Resolve divA_A0_l : core.

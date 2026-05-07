@@ -12,8 +12,12 @@ Notation irreducible1 :=
   (irreducible A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec)
   (only parsing).
 Notation s2p1 := (s2p A A0 eqA n ltM) (only parsing).
+Notation  ltp_eqp_comp  := (ltp_eqp_comp _ _ _ _ _ _ _ _ _ cs).
 
-Local Hint Resolve (reducetop A A0 A1 eqA invA minusA multA divA eqA_dec n ltM
-                ltM_dec) : core.
-Local Hint Resolve (reduceskip A A0 A1 eqA invA minusA multA divA eqA_dec n ltM
-                ltM_dec) : core.
+
+Let reducetop := (reducetop A A0 A1 eqA invA minusA multA divA eqA_dec n ltM
+                ltM_dec).
+Local Hint Resolve reducetop : core.
+Let reduceskip := (reduceskip A A0 A1 eqA invA minusA multA divA eqA_dec n ltM
+                ltM_dec).
+Local Hint Resolve reduceskip : core.

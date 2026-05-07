@@ -1,7 +1,7 @@
 (* This code is copyrighted by its authors; it is distributed under  *)
 (* the terms of the LGPL license (see LICENSE and description files) *)
 
-From Coq Require Import Arith.
+From Stdlib Require Import Arith.
 From Buchberger Require Export Pmults.
 From Buchberger Require Import LetP.
 
@@ -137,7 +137,7 @@ apply (eqT_trans A n) with (invTerm invA b); auto.
 apply plusTerm_eqT2; auto.
 apply (eqT_sym A n); apply invTerm_eqT; auto.
 apply zeroP_comp_eqTerm with (1 := cs) (2 := H'0).
-apply eqTerm_minusTerm_plusTerm_invTerm with (1 := cs); auto.
+apply eqTerm_minusTerm_plusTerm_invTerm; auto.
 apply (eqT_trans A n) with (1 := eq1); auto.
 apply (eqT_sym A n); apply plusTerm_eqT2; auto.
 apply (eqT_trans A n) with (1 := H'); auto.
@@ -335,7 +335,7 @@ Theorem order_minusP :
  canonical A0 eqA ltM (pX a l1) ->
  canonical A0 eqA ltM (pX a l2) ->
  canonical A0 eqA ltM l3 -> canonical A0 eqA ltM (pX a l3).
-Proof using plusA os eqA_dec divA cs.
+Proof using os eqA_dec ltM_dec cs.
 intros l1 l2 l3 a H'; elim H'; auto.
 intros l4 H'0 H'1 H'2.
 cut (canonical A0 eqA ltM l4);
@@ -380,7 +380,7 @@ Theorem canonical_minusP :
  minusP l1 l2 l3 ->
  canonical A0 eqA ltM l1 ->
  canonical A0 eqA ltM l2 -> canonical A0 eqA ltM l3.
-Proof using plusA os eqA_dec divA cs.
+Proof using os eqA_dec cs ltM_dec.
 intros l1 l2 l3 H'; elim H'; auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 H'3 H'4.
 apply order_minusP with (l1 := l4) (l2 := pX a2 l5); auto.
@@ -407,10 +407,10 @@ apply order_minusP with (l1 := pX a1 l4) (l2 := l5); auto.
 apply canonical_pX_eqT with (a := a2); auto.
 apply canonical_cons; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l5); auto.
-apply nZero_invTerm_nZero with (1 := cs); auto.
+apply nZero_invTerm_nZero; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l5); auto.
 apply canonical_pX_eqT with (a := a2); auto.
-apply nZero_invTerm_nZero with (1 := cs); auto.
+apply nZero_invTerm_nZero; auto.
 apply canonical_nzeroP with (ltM := ltM) (p := l5); auto.
 apply H'2; auto.
 apply canonical_imp_canonical with (a := a2); auto.
@@ -524,7 +524,7 @@ apply
     (y := invTerm (A:=A) invA (n:=n)
             (multTerm (A:=A) multA (n:=n) (T1 A1 n) a2)); 
  auto.
-apply eqTerm_invTerm_comp with (1 := cs); auto.
+apply eqTerm_invTerm_comp; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 intros a1 a2 l1 l2 l3 H'0 H'1 H'2 H'3.
 apply
@@ -948,7 +948,7 @@ apply
                (multTerm (A:=A) multA (n:=n) b a))
             (minuspf (mults (A:=A) multA (n:=n) a0 l)
                (mults (A:=A) multA (n:=n) b l))); auto.
-apply (eqpP1 A eqA); auto.
+apply eqpP1; auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply multTerm_minusTerm_dist_l with (1 := cs); auto.
 apply minuspf_inv3b; auto.
@@ -958,8 +958,8 @@ apply
     (1 := cs)
     (a := multTerm (A:=A) multA (n:=n) (minusTerm (A:=A) minusA (n:=n) a0 b)
             a); auto.
-apply nzeroP_multTerm with (1 := cs); auto.
-apply (canonical_nzeroP A A0 eqA n ltM) with (p := l); auto.
+apply nzeroP_multTerm; auto.
+apply (canonical_nzeroP n ltM) with (p := l); auto.
 apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply multTerm_minusTerm_dist_l with (1 := cs); auto.
 Qed.
@@ -972,9 +972,9 @@ Theorem order_pluspf :
    (pX a
       (pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec l1
          l2)).
-Proof using os.
+Proof using os cs.
 intros l1 l2 a H' H'0.
-apply order_plusP with (1 := os) (plusA := plusA) (l1 := l1) (l2 := l2); auto.
+apply order_plusP with (1 := cs) (plusA := plusA) (l1 := l1) (l2 := l2); auto.
 apply pluspf_is_plusP; auto.
 apply canonical_pluspf; auto.
 apply canonical_imp_canonical with (a := a); auto.
@@ -1012,7 +1012,7 @@ change
      (mults (A:=A) multA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n))
         (pX a l2))) in |- *; auto.
 apply (eqT_sym A n); auto.
-apply (canonical_nzeroP A A0 eqA n ltM) with (p := l1); auto.
+apply (canonical_nzeroP n ltM) with (p := l1); auto.
 Qed.
  
 Theorem minusP_refl :
@@ -1295,11 +1295,9 @@ apply
   with
     (y := invTerm (A:=A) invA (n:=n) (invTerm (A:=A) invA (n:=n) (T1 A1 n)));
  auto.
-apply eqTerm_invTerm_comp with (1 := cs); auto.
-apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply T1_multTerm_l with (1 := cs);
- auto.
-apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply invTerm_invol with (1 := cs);
- auto.
+apply eqTerm_invTerm_comp; auto.
+apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply T1_multTerm_l; auto.
+apply (eqTerm_sym _ _ _ _ _ _ _ _ _ cs n); apply invTerm_invol; auto.
 Qed.
 
 Local Hint Resolve invTerm_T1_multTerm_T1 : core.
@@ -1324,7 +1322,7 @@ intros p q Opp Opq;
                 (mults (A:=A) multA (n:=n)
                    (invTerm (A:=A) invA (n:=n) (T1 A1 n)) q))); 
  auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  (eqp_trans _ _ _ _ _ _ _ _ _ cs n)
   with

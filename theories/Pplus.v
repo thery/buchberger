@@ -9,7 +9,7 @@
                                                                            
   ************************************************************************** *)
 
-From Coq Require Import Arith.
+From Stdlib Require Import Arith.
 From Buchberger Require Export Peq.
 From Buchberger Require Import LetP.
 
@@ -238,12 +238,12 @@ Theorem order_plusP :
  canonical A0 eqA ltM (pX a l1) ->
  canonical A0 eqA ltM (pX a l2) ->
  canonical A0 eqA ltM l3 -> canonical A0 eqA ltM (pX a l3).
-Proof using os.
+Proof using os eqA_dec cs.
 intros l1 l2 l3 a H'; generalize a; elim H'; auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 a0 H'3 H'4 H'5.
 apply canonical_cons; auto.
 apply (canonical_pX_order _ A0 eqA) with (l := l4); auto.
-apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := pX a1 l4); auto.
+apply (canonical_nzeroP _ ltM) with (p := pX a1 l4); auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 H'3 a0 H'4 H'5 H'6.
 apply H'1; auto.
 apply canonical_skip_fst with (b := a1); auto.
@@ -254,11 +254,11 @@ apply ltT_eqTr with (a := a1); auto.
 apply (eqT_sym A n (plusTerm (A:=A) plusA (n:=n) a1 a2)).
 apply plusTerm_eqT1; auto.
 apply (canonical_pX_order _ A0 eqA) with (l := l4); auto.
-apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := pX a1 l4); auto.
+apply (canonical_nzeroP _ ltM) with (p := pX a1 l4); auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 a0 H'3 H'4 H'5.
 apply canonical_cons; auto.
 apply (canonical_pX_order _ A0 eqA) with (l := l5); auto.
-apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := pX a1 l4); auto.
+apply (canonical_nzeroP _ ltM) with (p := pX a1 l4); auto.
 Qed.
 
 Theorem canonical_plusP :
@@ -266,18 +266,18 @@ Theorem canonical_plusP :
  plusP l1 l2 l3 ->
  canonical A0 eqA ltM l1 ->
  canonical A0 eqA ltM l2 -> canonical A0 eqA ltM l3.
-Proof using os.
+Proof using os eqA_dec cs.
 intros l1 l2 l3 H'; elim H'; auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 H'3 H'4; try assumption.
 apply order_plusP with (l1 := l4) (l2 := pX a2 l5); auto.
 apply canonical_cons; auto.
-apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := l4); auto.
+apply (canonical_nzeroP _ ltM) with (p := l4); auto.
 apply H'2; auto.
-apply (canonical_imp_canonical _ A0 eqA _ ltM) with (a := a1); auto.
+apply (canonical_imp_canonical _ ltM) with (a := a1); auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 H'3 H'4 H'5.
 apply H'1; auto.
-apply (canonical_imp_canonical _ A0 eqA _ ltM) with (a := a1); auto.
-apply (canonical_imp_canonical _ A0 eqA _ ltM) with (a := a2); auto.
+apply (canonical_imp_canonical _ ltM) with (a := a1); auto.
+apply (canonical_imp_canonical _ ltM) with (a := a2); auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 H'3 H'4 H'5.
 apply order_plusP with (l1 := l4) (l2 := l5); auto.
 apply canonical_pX_eqT with (a := a1); auto.
@@ -287,12 +287,12 @@ apply canonical_pX_eqT with (a := a2); auto; auto.
 apply (eqT_sym A n (plusTerm (A:=A) plusA (n:=n) a1 a2)).
 apply plusTerm_eqT2; auto.
 apply H'1.
-apply (canonical_imp_canonical _ A0 eqA _ ltM) with (a := a1); auto.
-apply (canonical_imp_canonical _ A0 eqA _ ltM) with (a := a2); auto.
+apply (canonical_imp_canonical _ ltM) with (a := a1); auto.
+apply (canonical_imp_canonical _ ltM) with (a := a2); auto.
 intros a1 a2 l4 l5 l6 H'0 H'1 H'2 H'3 H'4.
 apply order_plusP with (l1 := pX a1 l4) (l2 := l5); auto.
 apply canonical_cons; auto.
-apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := l5); auto.
+apply (canonical_nzeroP _ ltM) with (p := l5); auto.
 apply H'2; auto.
 apply canonical_imp_canonical with (a := a2); auto.
 Qed.
@@ -301,7 +301,7 @@ Theorem canonical_pluspf :
  forall l1 l2,
  canonical A0 eqA ltM l1 ->
  canonical A0 eqA ltM l2 -> canonical A0 eqA ltM (pluspf l1 l2).
-Proof using os.
+Proof using os cs eqA_dec.
 intros l1 l2 H' H'0; generalize (pluspf_is_plusP l1 l2); intros u1.
 apply canonical_plusP with (l1 := l1) (l2 := l2); auto.
 Qed.
@@ -399,7 +399,7 @@ Theorem pluspf_inv1 :
  forall a b p q,
  ltT ltM b a ->
  eqP A eqA n (pX a (pluspf p (pX b q))) (pluspf (pX a p) (pX b q)).
-Proof using os multA minusA invA divA cs A1.
+Proof using os cs eqA_dec.
 intros a b p q H'; try assumption.
 rewrite (plusP_inv1 a b p q (pluspf (pX a p) (pX b q))); auto.
 Qed.
@@ -547,7 +547,7 @@ Theorem order_pluspf :
  forall l1 l2 a,
  canonical A0 eqA ltM (pX a l1) ->
  canonical A0 eqA ltM (pX a l2) -> canonical A0 eqA ltM (pX a (pluspf l1 l2)).
-Proof using os.
+Proof using os cs eqA_dec.
 intros l1 l2 a H' H'0.
 apply order_plusP with (l1 := l1) (l2 := l2); auto.
 apply canonical_pluspf; auto.
@@ -647,13 +647,13 @@ cut (canonical A0 eqA ltM l2);
  [ intros C2 | apply canonical_imp_canonical with (a := a1) ]; 
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a);
- [ intros nZ0 | apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := l0) ];
+ [ intros nZ0 | apply (canonical_nzeroP _ ltM) with (p := l0) ];
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a0);
- [ intros nZ1 | apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := l1) ];
+ [ intros nZ1 | apply (canonical_nzeroP _ ltM) with (p := l1) ];
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a1);
- [ intros nZ2 | apply (canonical_nzeroP _ A0 eqA _ ltM) with (p := l2) ];
+ [ intros nZ2 | apply (canonical_nzeroP _ ltM) with (p := l2) ];
  auto.
 change
   (eqP A eqA n (pluspf (pluspf (pX a1 l2) (pX a0 l1)) (pX a l0))
@@ -1132,10 +1132,10 @@ cut (canonical A0 eqA ltM q0);
  [ intros C1 | apply canonical_imp_canonical with (a := mb) ]; 
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) ma);
- [ intros nZ0 | apply (canonical_nzeroP _ A0 eqA n ltM) with (p := p0) ];
+ [ intros nZ0 | apply (canonical_nzeroP n ltM) with (p := p0) ];
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) mb);
- [ intros nZ1 | apply (canonical_nzeroP _ A0 eqA n ltM) with (p := q0) ];
+ [ intros nZ1 | apply (canonical_nzeroP n ltM) with (p := q0) ];
  auto.
 generalize H'4; elim r; clear H'4 r.
 intros H'4; rewrite <- pO_pluspf_inv2; rewrite <- pO_pluspf_inv2; auto.
@@ -1144,7 +1144,7 @@ cut (canonical A0 eqA ltM l);
  [ intros C2 | apply canonical_imp_canonical with (a := a) ]; 
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a);
- [ intros nZ2 | apply (canonical_nzeroP _ A0 eqA n ltM) with (p := l) ]; 
+ [ intros nZ2 | apply (canonical_nzeroP n ltM) with (p := l) ]; 
  auto.
 change
   (eqP A eqA n (pluspf (pX ma p0) (pX a l)) (pluspf (pX mb q0) (pX a l)))
@@ -1214,10 +1214,10 @@ cut (canonical A0 eqA ltM q0);
  [ intros C1 | apply canonical_imp_canonical with (a := mb) ]; 
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) ma);
- [ intros nZ0 | apply (canonical_nzeroP _ A0 eqA n ltM) with (p := p0) ];
+ [ intros nZ0 | apply (canonical_nzeroP n ltM) with (p := p0) ];
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) mb);
- [ intros nZ1 | apply (canonical_nzeroP _ A0 eqA n ltM) with (p := q0) ];
+ [ intros nZ1 | apply (canonical_nzeroP n ltM) with (p := q0) ];
  auto.
 generalize H'4; elim r; clear H'4 r.
 intros H'4; rewrite <- pO_pluspf_inv1; rewrite <- pO_pluspf_inv1; auto.
@@ -1226,7 +1226,7 @@ cut (canonical A0 eqA ltM l);
  [ intros C2 | apply canonical_imp_canonical with (a := a) ]; 
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a);
- [ intros nZ2 | apply (canonical_nzeroP _ A0 eqA n ltM) with (p := l) ]; 
+ [ intros nZ2 | apply (canonical_nzeroP n ltM) with (p := l) ]; 
  auto.
 change
   (eqP A eqA n (pluspf (pX a l) (pX ma p0)) (pluspf (pX a l) (pX mb q0)))

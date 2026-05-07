@@ -38,7 +38,7 @@ apply
     (1 := cs); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply canonical_pluspf; auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_mults; auto.
 apply inPolySet_imp_canonical with (L := Q); auto.
 Qed.
 
@@ -103,7 +103,7 @@ apply
             (pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM)
                ltM_dec (mults (A:=A) multA (n:=n) a q) p0) q0); 
  auto.
-apply eqp_pluspf_com with (1 := cs); auto.
+apply eqp_pluspf_com; auto.
 apply
  eqp_imp_canonical
   with
@@ -197,13 +197,14 @@ Qed.
 
 Local Hint Resolve CombLinear_id : core.
 
+Let spolyf := (spolyf _ _ _ _ _ _ _ _ _ cs eqA_dec _ _ ltM_dec).
+
 Theorem CombLinear_spoly :
  forall (Q : list (poly A0 eqA ltM)) (p q : list (Term A n))
    (Cp : canonical A0 eqA ltM p) (Cq : canonical A0 eqA ltM q),
  inPolySet A A0 eqA n ltM p Q ->
  inPolySet A A0 eqA n ltM q Q ->
- CombLinear Q
-   (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec p q Cp Cq).
+ CombLinear Q (spolyf p q Cp Cq).
 Proof using os cs.
 intros Q p; case p.
 simpl in |- *; auto.
@@ -217,10 +218,10 @@ cut (canonical A0 eqA ltM l);
  [ intros Op2 | apply canonical_imp_canonical with (a := a) ]; 
  auto.
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a);
- [ intros nZa | apply (canonical_nzeroP A A0 eqA n ltM) with (p := l); auto ].
+ [ intros nZa | apply (canonical_nzeroP n ltM) with (p := l); auto ].
 cut (~ zeroP (A:=A) A0 eqA (n:=n) a0);
  [ intros nZa0
- | apply (canonical_nzeroP A A0 eqA n ltM) with (p := l0); auto ].
+ | apply (canonical_nzeroP n ltM) with (p := l0); auto ].
 apply
  CombLinear_comp
   with
@@ -233,11 +234,11 @@ apply
                (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
                   (ppc (A:=A) A1 (n:=n) a a0) (b:=a0) nZa0) 
                (pX a0 l0))); auto.
-apply spolyf_canonical with (1 := cs); auto.
+apply spolyf_canonical; auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 change
   (eqP A eqA n
-     (spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec
+     (spolyf
         (pX a l) (pX a0 l0) Cp Cq)
      (minuspf A A0 A1 eqA invA minusA multA eqA_dec n ltM ltM_dec
         (mults (A:=A) multA (n:=n)
@@ -248,7 +249,7 @@ change
            (divTerm (A:=A) (A0:=A0) (eqA:=eqA) divA (n:=n)
               (ppc (A:=A) A1 (n:=n) a a0) (b:=a0) nZa0) 
            (pX a0 l0)))) in |- *.
-apply spoly_is_minus with (1 := cs); auto.
+apply spoly_is_minus; auto.
 Qed.
 
 Theorem CombLinear_reduce :
@@ -324,10 +325,10 @@ Inductive Grobner (Q : list (poly A0 eqA ltM)) : Prop :=
        reducestar A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q
          p q -> eqP A eqA n q (pO A n)) -> Grobner Q.
  
+Let SpolyQ := (SpolyQ _ _ _ _ _ _ _ _ _ cs eqA_dec _ _ ltM_dec).
+
 Theorem Grobner_imp_SpolyQ :
- forall Q : list (poly A0 eqA ltM),
- Grobner Q ->
- SpolyQ A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q.
+ forall Q : list (poly A0 eqA ltM), Grobner Q -> SpolyQ Q.
 Proof using os cs.
 intros Q H'; elim H'.
 intros H'1.
@@ -340,24 +341,18 @@ elim
     (eqA_dec := eqA_dec)
     (1 := cs)
     (Q := Q)
-    (p := spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec p q
-            H'2 H'4); auto.
+    (p := spolyf p q H'2 H'4); auto.
 intros t E; apply Spoly_10 with (Cp := H'2) (Cq := H'4); auto.
 apply
  reducestar_eqp_com
   with
     (1 := cs)
-    (p := spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec p q
-            H'2 H'4)
+    (p := spolyf p q H'2 H'4)
     (q := t); auto.
-apply spolyf_canonical with (1 := cs); auto.
-apply
- H'1
-  with
-    (p := spolyf A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec p q
-            H'2 H'4); auto.
+apply spolyf_canonical; auto.
+apply H'1 with (p := spolyf p q H'2 H'4); auto.
 apply CombLinear_spoly; auto.
-apply spolyf_canonical with (1 := cs); auto.
+apply spolyf_canonical; auto.
 Qed.
 
 Inductive ConfluentReduce (Q : list (poly A0 eqA ltM)) : Prop :=
@@ -369,8 +364,7 @@ Inductive ConfluentReduce (Q : list (poly A0 eqA ltM)) : Prop :=
  
 Theorem SpolyQ_imp_ConfluentReduce :
  forall Q : list (poly A0 eqA ltM),
- SpolyQ A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec Q ->
- ConfluentReduce Q.
+ SpolyQ Q -> ConfluentReduce Q.
 Proof using plusA os cs.
 intros Q H'0.
 apply ConfluentReduce0.
@@ -379,7 +373,7 @@ change
   (ReduStarConfluent A A0 A1 eqA invA minusA multA divA eqA_dec n ltM ltM_dec
      Q (s2p A A0 eqA n ltM (mks A A0 eqA n ltM p H'1))) 
  in |- *.
-apply confl_restar with (1 := cs); auto.
+apply confl_restar with (1 := os) (2 := H'0).
 Qed.
 
 Theorem ConfluentReduce_imp_Grobner :
@@ -497,8 +491,8 @@ apply
     (p := pluspf (A:=A) A0 (eqA:=eqA) plusA eqA_dec (n:=n) (ltM:=ltM) ltM_dec
             (mults (A:=A) multA (n:=n) a0 q) p); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
-apply canonical_pluspf with (1 := os); auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_pluspf; auto.
+apply canonical_mults; auto.
 apply inPolySet_imp_canonical with (L := P); auto.
 apply CombLinear_canonical with (Q := Q); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
@@ -526,7 +520,7 @@ apply
     auto.
 2: apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 2: apply canonical_pluspf; auto.
-2: apply canonical_mults with (1 := cs); auto.
+2: apply canonical_mults; auto.
 2: apply inPolySet_imp_canonical with (L := R); auto.
 2: apply CombLinear_canonical with (1 := H'2); auto.
 2: apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
@@ -640,7 +634,7 @@ apply
             (mults (A:=A) multA (n:=n) a q) p0); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
 apply canonical_pluspf; auto.
-apply canonical_mults with (1 := cs); auto.
+apply canonical_mults; auto.
 apply inPolySet_imp_canonical with (L := L1); auto.
 apply CombLinear_canonical with (1 := H'2); auto.
 apply (eqp_sym _ _ _ _ _ _ _ _ _ cs n); auto.
