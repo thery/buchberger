@@ -36,12 +36,12 @@ Also includes a constructive proof of Dickson's lemma.
 - Author(s):
   - Laurent Théry (initial)
   - Henrik Persson (initial)
-- Coq-community maintainer(s):
+- Rocq-community maintainer(s):
   - Karl Palmskog ([**@palmskog**](https://github.com/palmskog))
 - License: [GNU Lesser General Public License v2.1 or later](LICENSE)
-- Compatible Coq versions: 8.17 or later
+- Compatible Rocq/Coq versions: 8.18 or later
 - Additional dependencies: none
-- Coq namespace: `Buchberger`
+- Rocq/Coq namespace: `Buchberger`
 - Related publication(s):
   - [A machine checked implementation of Buchberger's algorithm](https://link.springer.com/article/10.1023/A:1026518331905) doi:[10.1023/A:1026518331905](https://doi.org/10.1023/A:1026518331905)
   - [An Integrated Development of Buchberger's Algorithm in Coq](https://hal.inria.fr/inria-00072316/) 
@@ -53,15 +53,19 @@ The easiest way to install the latest released version of Buchberger
 is via [OPAM](https://opam.ocaml.org/doc/Install.html):
 
 ```shell
-opam repo add coq-released https://coq.inria.fr/opam/released
+opam repo add rocq-released https://rocq-prover.org/opam/released
 opam install coq-buchberger
 ```
 
-To instead build and install manually, do:
+To instead build and install manually, you need to make sure that all the
+libraries this development depends on are installed.  The easiest way to do that
+is still to rely on opam:
 
 ``` shell
 git clone https://github.com/coq-community/buchberger.git
 cd buchberger
+opam repo add rocq-released https://rocq-prover.org/opam/released
+opam install --deps-only .
 make   # or make -j <number-of-cores-on-your-machine> 
 make install
 ```
