@@ -9,7 +9,7 @@
                                                                            
   ************************************************************************** *)
 
-From Stdlib Require Import Arith.
+From Coq Require Import Arith.
 From Buchberger Require Export Peq.
 From Buchberger Require Import LetP.
 

@@ -1,9 +1,9 @@
 (* This code is copyrighted by its authors; it is distributed under  *)
 (* the terms of the LGPL license (see LICENSE and description files) *)
 
-From Stdlib Require Import Lexicographic_Exponentiation.
-From Stdlib Require Import Relation_Definitions.
-From Stdlib Require Import Inverse_Image Inclusion List Relation_Operators.
+From Coq Require Import Lexicographic_Exponentiation.
+From Coq Require Import Relation_Definitions.
+From Coq Require Import Inverse_Image Inclusion List Relation_Operators.
 From Buchberger Require Import Relation_Operators_compat Monomials.
 From Buchberger Require Import Term CoefStructure OrderStructure.
 

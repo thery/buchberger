@@ -9,7 +9,7 @@
                                                                            
   ************************************************************************** *)
 
-From Stdlib Require Import Relation_Definitions.
+From Coq Require Import Relation_Definitions.
 From Buchberger Require Import CoefStructure moreCoefStructure.
 From Buchberger Require Import OrderStructure Monomials.
 

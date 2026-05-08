@@ -1,9 +1,9 @@
 (* This code is copyrighted by its authors; it is distributed under  *)
 (* the terms of the LGPL license (see LICENSE and description files) *)
 
-From Stdlib Require Export List.
-From Stdlib Require Import Arith Inclusion Inverse_Image Wf_nat Relation_Definitions.
-From Stdlib Require Import Relation_Operators Lexicographic_Product.
+From Coq Require Export List.
+From Coq Require Import Arith Inclusion Inverse_Image Wf_nat Relation_Definitions.
+From Coq Require Import Relation_Operators Lexicographic_Product.
 From Buchberger Require Import Relation_Operators_compat LetP.
 From Buchberger Require Export WfR0.
 

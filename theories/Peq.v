@@ -9,8 +9,8 @@
                                                                            
   ************************************************************************** *)
 
-From Stdlib Require Export Relation_Definitions List.
-From Stdlib Require Import Arith Compare_dec.
+From Coq Require Export Relation_Definitions List.
+From Coq Require Import Arith Compare_dec.
 From Buchberger Require Export CoefStructure OrderStructure POrder Monomials Term.
 
 Set Default Proof Using "Type".

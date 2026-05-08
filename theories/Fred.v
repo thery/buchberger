@@ -9,7 +9,7 @@
                                                                            
    ************************************************************************ *)
 
-From Stdlib Require Import List Relation_Definitions.
+From Coq Require Import List Relation_Definitions.
 From Buchberger Require Import LetP.
 
 Section Reduce.
